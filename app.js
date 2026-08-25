@@ -1,458 +1,238 @@
-(function () {
-  const DATA = window.TCSM_DATA || { categories: [], organizations: [], events: [], sources: [] };
-  const taiwanCenter = [23.75, 121.0];
-  const markerIndex = new Map();
-  const storageKey = "tcsm-lang";
-  let activeFilter = "all";
-  let searchText = "";
-  let currentLang = localStorage.getItem(storageKey) || "zh";
-  let map = null;
-  let markerLayer = null;
-  let areaLayer = null;
-  let mapReady = false;
-  let currentItems = [];
-  let selectedItemId = null;
+(() => {
+  const E = window.ELECTION_DATA;
+  const C = window.TCSM_DATA || { categories:[], organizations:[], events:[], sources:[] };
+  if (!E) return;
 
-  const $ = (selector) => document.querySelector(selector);
-  const cardGrid = $("#cardGrid");
-  const filterRow = $("#filterRow");
-  const detailTitle = $("#detailTitle");
-  const detailContent = $("#detailContent");
-  const searchInput = $("#searchInput");
-  const langToggle = $("#langToggle");
-  const focusTaiwan = $("#focusTaiwan");
+  const $ = (s, root=document) => root.querySelector(s);
+  const fmt = new Intl.NumberFormat("zh-TW");
+  const pct = n => `${Number(n).toFixed(1)}%`;
+  const round1 = n => Math.round(n * 10) / 10;
+  const esc = value => String(value ?? "").replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
+  const daysBetween = (a,b) => Math.max(0, Math.round((new Date(`${b}T00:00:00+08:00`) - new Date(`${a}T00:00:00+08:00`))/86400000));
+  const normalizeName = n => String(n||"").replaceAll("台","臺");
+  const party = key => E.parties[key] || E.parties.OTHER;
+  const partyPill = key => `<span class="party-pill"><i class="swatch" style="background:${party(key).color}"></i>${esc(party(key).short)}</span>`;
+  const external = (url,label="來源") => url ? `<a class="external" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label)} ↗</a>` : "—";
 
-  const i18n = {
-    zh: {
-      brandTitle: "台灣公民與主權地圖",
-      navMap: "地圖",
-      navList: "資料卡",
-      navSources: "查證來源",
-      navUpdate: "更新方式",
-      heroEyebrow: "公開資料・守法參與・快速查證",
-      heroTitle: "用一張地圖，看懂台灣民主、主權、公民倡議的公開資訊。",
-      heroText: "這裡整理可公開查證的政黨、協會、基金會、活動入口與新聞來源。重點是讓獨派朋友、中立讀者、守法公民與年輕人都能快速理解：誰在辦、在哪裡、怎麼查、參與前要注意什麼。",
-      heroPrimary: "開始看地圖",
-      heroSecondary: "地圖回台灣",
-      trustTitle: "查得到、看得懂、守得住界線",
-      trustText: "只整理公開來源，不放私人住址、不公開聚會、不做個人追蹤。活動狀態會依日期自動整理，已結束活動不顯示，避免資訊過期。",
-      pill1: "公開可查",
-      pill2: "守法安全",
-      pill3: "手機友善",
-      pill4: "資訊不迷路",
-      searchLabel: "搜尋組織、地址、活動、主題",
-      searchPlaceholder: "例如：制憲、青年、台北、g0v、活動通",
-      legendOrg: "公開組織",
-      legendEvent: "活動／入口",
-      legendArea: "活動範圍",
-      detailEyebrow: "點一下，看重點",
-      detailTitle: "點地圖上的標記看詳細資訊",
-      detailText: "你可以看到公開地址、活動範圍、主辦方、協辦方、主題、日期、參加資格與查證連結。出發前請再看一次官方公告，才不會白跑。",
-      cardsEyebrow: "分類切換，資訊不塞車",
-      cardsTitle: "公開資料卡",
-      cardsText: "資料量增加時，請用上方分類與搜尋快速切換；地圖只顯示目前篩選結果，手機瀏覽也能保持順。",
-      sourceTitle: "可查證來源清單",
-      sourceText: "資料優先參考政府登記、政黨官網、組織官網、公開活動頁、公開新聞與事實查核平台。社群貼文可當線索，正式地址與活動細節仍以官方公告為準。",
-      boundaryTitle: "活動狀態怎麼判斷？",
-      boundaryText: "已結束活動會自動隱藏；尚未開始、籌備中或報名中的活動，會跟公開活動一起顯示。若只有入口頁，會標成「活動入口」，不假裝成單一場次。",
-      maintainEyebrow: "給維護者",
-      maintainTitle: "每筆資料都要能回到公開來源",
-      maintainText: "新增資料時，請同時放入名稱、公開位置或活動範圍、主辦方、協辦方、開始日期、結束日期、參加資格、查證連結與更新狀態。地址不確定就先標成待覆核，不要硬放精準點。",
-      step1: "先確認來源是否公開、合法、可追溯。",
-      step2: "再確認地點是否為公開地址或公開活動範圍。",
-      step3: "活動結束後，請填入結束日期；網站會自動不顯示。",
-      footerText: "台灣公民與主權地圖｜公開資料整理，不追蹤私人行程。",
-      noResultTitle: "查無資料",
-      noResultText: "換個關鍵字試試，例如「台北」「制憲」「青年」「活動通」。",
-      kindOrg: "公開組織",
-      kindEvent: "公開活動",
-      type: "類型",
-      place: "公開位置／活動範圍",
-      host: "主辦方",
-      coHost: "協辦方",
-      topic: "主題／訴求",
-      time: "時間",
-      startDate: "開始日期",
-      endDate: "結束日期",
-      eligibility: "參加資格",
-      status: "狀態",
-      quality: "定位精準度",
-      source: "資料來源",
-      updated: "更新狀態",
-      official: "官方來源",
-      signup: "活動／報名連結",
-      maps: "開 Google Maps",
-      orgMarker: "組",
-      eventMarker: "活",
-      statusActive: "進行中",
-      statusUpcoming: "即將開始",
-      statusPlanning: "籌備中",
-      statusPortal: "活動入口",
-      statusOrg: "公開資料"
-    },
-    en: {
-      brandTitle: "Taiwan Civic & Sovereignty Map",
-      navMap: "Map",
-      navList: "Cards",
-      navSources: "Sources",
-      navUpdate: "Updates",
-      heroEyebrow: "Public data · lawful civic action · fast fact-checking",
-      heroTitle: "A map for public civic, democracy, and Taiwan sovereignty information.",
-      heroText: "This site organizes public, checkable sources: parties, associations, foundations, activity portals, and news references. It helps civic-minded readers, neutral visitors, law-abiding citizens, and young people understand who hosts an event, where it happens, how to verify it, and what to check before joining.",
-      heroPrimary: "Open the map",
-      heroSecondary: "Back to Taiwan",
-      trustTitle: "Clear, verifiable, and privacy-aware",
-      trustText: "Only public sources are listed. No private addresses, no private gatherings, no personal tracking. Ended events are automatically hidden to reduce outdated information.",
-      pill1: "Public sources",
-      pill2: "Lawful & safe",
-      pill3: "Mobile first",
-      pill4: "Easy to verify",
-      searchLabel: "Search groups, places, events, topics",
-      searchPlaceholder: "Try: constitution, youth, Taipei, g0v, Accupass",
-      legendOrg: "Public group",
-      legendEvent: "Event / portal",
-      legendArea: "Event area",
-      detailEyebrow: "Tap for context",
-      detailTitle: "Tap a marker for details",
-      detailText: "You can review public locations, activity areas, hosts, co-hosts, topics, dates, eligibility, and verification links. Please check the official announcement before going.",
-      cardsEyebrow: "Filters keep it fast",
-      cardsTitle: "Public data cards",
-      cardsText: "As the dataset grows, use categories and search to switch quickly. The map only renders the current results so mobile browsing stays smooth.",
-      sourceTitle: "Verification sources",
-      sourceText: "Priority sources include government registrations, party websites, organization websites, public event pages, public news, and fact-checking platforms. Social posts can be clues, but official details should be verified through formal sources.",
-      boundaryTitle: "How are event statuses handled?",
-      boundaryText: "Ended events are hidden. Upcoming, planned, and open-registration events remain visible with public activity results. Portal pages are clearly marked as event portals, not single events.",
-      maintainEyebrow: "For maintainers",
-      maintainTitle: "Every item should trace back to a public source",
-      maintainText: "When adding data, include the name, public location or activity area, host, co-host, start date, end date, eligibility, verification link, and update status. If a location is uncertain, mark it for review instead of showing a precise point.",
-      step1: "Confirm the source is public, lawful, and traceable.",
-      step2: "Confirm the place is a public address or public activity area.",
-      step3: "After an event ends, add the end date; the site will hide it automatically.",
-      footerText: "Taiwan Civic & Sovereignty Map | Public information only. No private tracking.",
-      noResultTitle: "No results",
-      noResultText: "Try another keyword, such as Taipei, constitution, youth, or Accupass.",
-      kindOrg: "Public group",
-      kindEvent: "Public event",
-      type: "Type",
-      place: "Public place / activity area",
-      host: "Host",
-      coHost: "Co-host",
-      topic: "Topic",
-      time: "Time",
-      startDate: "Start date",
-      endDate: "End date",
-      eligibility: "Eligibility",
-      status: "Status",
-      quality: "Location quality",
-      source: "Source",
-      updated: "Update note",
-      official: "Official source",
-      signup: "Event / signup link",
-      maps: "Open Google Maps",
-      orgMarker: "G",
-      eventMarker: "E",
-      statusActive: "Active",
-      statusUpcoming: "Upcoming",
-      statusPlanning: "Planning",
-      statusPortal: "Portal",
-      statusOrg: "Public info"
+  function weights(poll, halfLife) {
+    const age = daysBetween(poll.fieldEnd, E.asOf);
+    const sample = poll.n ? Math.sqrt(poll.n / 1000) : 1;
+    return (poll.quality ?? 0.9) * sample * Math.pow(2, -age / halfLife);
+  }
+  function normalizeObject(obj) {
+    const total = Object.values(obj).reduce((a,b)=>a+Number(b||0),0) || 1;
+    return Object.fromEntries(Object.entries(obj).map(([k,v])=>[k, Number(v||0)/total*100]));
+  }
+  function poolPolls(polls, candidateIds, halfLife) {
+    const totals = Object.fromEntries(candidateIds.map(id=>[id,0]));
+    let ws = 0;
+    polls.forEach(p => {
+      const raw = Object.fromEntries(candidateIds.map(id=>[id, Number(p.values[id]||0)]));
+      const norm = normalizeObject(raw);
+      const w = weights(p, halfLife);
+      candidateIds.forEach(id => totals[id] += norm[id] * w);
+      ws += w;
+    });
+    if (!ws) return null;
+    return Object.fromEntries(candidateIds.map(id=>[id, totals[id]/ws]));
+  }
+  function blend(a,b,lambda) {
+    const keys = [...new Set([...Object.keys(a||{}),...Object.keys(b||{})])];
+    const out = {};
+    keys.forEach(k => out[k] = (a?.[k]||0)*lambda + (b?.[k]||0)*(1-lambda));
+    return normalizeObject(out);
+  }
+  function sortedShares(shares) { return Object.entries(shares).sort((a,b)=>b[1]-a[1]); }
+  function confidenceForPolls(polls) {
+    if (!polls.length) return {label:"低",cls:"low",reason:"無現行對決民調"};
+    const recent = polls.filter(p=>daysBetween(p.fieldEnd,E.asOf)<=120);
+    if (recent.length>=2) return {label:"中",cls:"mid",reason:"至少2份近期可比民調"};
+    if (recent.length===1) return {label:"中",cls:"mid",reason:"1份近期可比民調"};
+    return {label:"偏低",cls:"low",reason:"僅較舊可比民調"};
+  }
+
+  const countyIndex = Object.fromEntries(E.counties.map(c=>[c.name,c]));
+
+  function mayorBase(county, race) {
+    const c = countyIndex[county];
+    const raw = {};
+    race.candidates.forEach(x => raw[x.id] = x.manualBase ?? (x.baseKeys||[]).reduce((s,k)=>s+(c.p2024[k]||0),0));
+    return normalizeObject(raw);
+  }
+  function computeMayor() {
+    const daysTo = daysBetween(E.asOf,E.localElectionDate);
+    const lambda = Math.max(E.model.localPollBlendMin, Math.min(E.model.localPollBlendMax, 0.45 + 0.35*Math.exp(-daysTo/180)));
+    const results = {};
+    Object.entries(E.mayorRaces).forEach(([county,race])=>{
+      const ids = race.candidates.map(c=>c.id);
+      const allPolls = E.mayorPolls.filter(p=>p.county===county);
+      const polls = allPolls.filter(p=>p.useInModel!==false);
+      const base = mayorBase(county,race);
+      const pooled = poolPolls(polls,ids,E.model.localHalfLifeDays);
+      const forecast = pooled ? blend(pooled,base,lambda) : base;
+      const sorted = sortedShares(forecast);
+      const leader = race.candidates.find(c=>c.id===sorted[0][0]);
+      const runner = race.candidates.find(c=>c.id===sorted[1]?.[0]);
+      const volume = countyIndex[county].mayorVotes2022;
+      results[county] = {county,race,polls,allPolls,base,pooled,forecast,leader,runner,margin:sorted[0][1]-(sorted[1]?.[1]||0),confidence:confidenceForPolls(polls),volume,lambda:pooled?lambda:0};
+    });
+    return results;
+  }
+
+  function computeCouncil() {
+    const ids=["DPP","KMT","TPP"];
+    const pooled=poolPolls(E.councilPolls,ids,E.model.localHalfLifeDays);
+    const nationalBase={DPP:E.national2024.DPP,KMT:E.national2024.KMT,TPP:E.national2024.TPP};
+    const national=blend(pooled,nationalBase,E.model.councilPartyPollBlend);
+    const results={};
+    E.counties.forEach(c=>{
+      const swing={};
+      ids.forEach(k=>swing[k]=c.p2024[k]*(national[k]/E.national2024[k]));
+      const norm=normalizeObject(swing);
+      const six=["臺北市","新北市","桃園市","臺中市","臺南市","高雄市"].includes(c.name);
+      const other=(six?E.model.councilOtherShareSixCities:E.model.councilOtherShareOtherCounties)*100;
+      const shares={DPP:norm.DPP*(100-other)/100,KMT:norm.KMT*(100-other)/100,TPP:norm.TPP*(100-other)/100,OTHER:other};
+      const sorted=sortedShares(shares);
+      results[c.name]={county:c.name,shares,leader:sorted[0][0],margin:sorted[0][1]-sorted[1][1],volume:c.councilVotes2022,confidence:{label:"偏低",cls:"low",reason:"全國政黨支持度＋歷史結構，非議員投票題"}};
+    });
+    return {results,national,pooled};
+  }
+
+  function computePresident() {
+    const ids=E.president.candidates.map(c=>c.id);
+    const pooled=poolPolls(E.president.polls,ids,E.model.presidentialHalfLifeDays);
+    const pMap={lai2028:"DPP",lu2028:"KMT",ko2028:"TPP"};
+    const pollParty=Object.fromEntries(ids.map(id=>[pMap[id],pooled[id]]));
+    const nationalBase={DPP:E.national2024.DPP,KMT:E.national2024.KMT,TPP:E.national2024.TPP};
+    const nationalParty=blend(pollParty,nationalBase,E.model.presidentialPollBlend);
+    const results={};
+    E.counties.forEach(c=>{
+      const raw={};
+      ["DPP","KMT","TPP"].forEach(k=>raw[k]=c.p2024[k]*(nationalParty[k]/E.national2024[k]));
+      const sharesParty=normalizeObject(raw);
+      const shares={lai2028:sharesParty.DPP,lu2028:sharesParty.KMT,ko2028:sharesParty.TPP};
+      const sorted=sortedShares(shares);
+      const leader=E.president.candidates.find(x=>x.id===sorted[0][0]);
+      results[c.name]={county:c.name,shares,leader,margin:sorted[0][1]-sorted[1][1],volume:c.presidentVotes2024,confidence:{label:"低",cls:"low",reason:"距2028尚遠且候選人為假設情境"}};
+    });
+    return {results,nationalParty,pollParty};
+  }
+
+  const mayor=computeMayor();
+  const council=computeCouncil();
+  const president=computePresident();
+
+  function metric(label,value,sub="") { return `<div class="metric"><b>${esc(value)}</b><span>${esc(label)}${sub?`｜${esc(sub)}`:""}</span></div>`; }
+  function renderSummary() {
+    $("#mayorAsOf").textContent=E.asOf;
+    $("#candidateNotice").textContent=E.candidateNotice;
+    const leadCounts={}; Object.values(mayor).forEach(r=>leadCounts[r.leader.party]=(leadCounts[r.leader.party]||0)+1);
+    $("#mayorSummary").innerHTML=[metric("模型領先縣市",`民進黨 ${leadCounts.DPP||0}`),metric("模型領先縣市",`國民黨 ${leadCounts.KMT||0}`),metric("有可比民調縣市",Object.values(mayor).filter(r=>r.polls.length).length),metric("尚無可比民調縣市",Object.values(mayor).filter(r=>!r.polls.length).length)].join("");
+    const nat=Object.entries(council.national).sort((a,b)=>b[1]-a[1]);
+    $("#councilSummary").innerHTML=nat.map(([k,v])=>metric(`${party(k).label}｜三黨結構`,pct(v))).concat(metric("資料用途","地方擺動訊號")).join("");
+    const pNat=Object.entries(president.nationalParty).sort((a,b)=>b[1]-a[1]);
+    $("#presidentSummary").innerHTML=pNat.map(([k,v])=>metric(`${party(k).label}｜全國情境`,pct(v))).concat(metric("模型性質","低信心情境")).join("");
+  }
+
+  function legendHtml(keys) { return keys.map(k=>`<span class="legend-item"><i class="swatch" style="background:${party(k).color}"></i>${party(k).label}</span>`).join(""); }
+
+  function candidateSharesHtml(r) {
+    return sortedShares(r.forecast).map(([id,share])=>{
+      const c=r.race.candidates.find(x=>x.id===id); return `<span class="candidate-line">${esc(c.name)} ${pct(share)}（${fmt.format(Math.round(r.volume*share/100))}票）</span>`;
+    }).join("<br>");
+  }
+  function renderTables() {
+    $("#mayorForecastTable").innerHTML=`<thead><tr><th>縣市</th><th>模型領先</th><th>預測比例／票數</th><th>領先差</th><th>民調</th><th>信心</th><th>說明</th></tr></thead><tbody>${E.counties.map(c=>{
+      const r=mayor[c.name]; return `<tr><td><b>${c.name}</b></td><td>${partyPill(r.leader.party)} <span class="lead">${esc(r.leader.name)}</span></td><td>${candidateSharesHtml(r)}</td><td>${pct(r.margin)}</td><td>${r.polls.length}份</td><td><span class="confidence ${r.confidence.cls}" title="${esc(r.confidence.reason)}">${r.confidence.label}</span></td><td>${esc(r.race.allianceNote||r.race.note||"—")}</td></tr>`;
+    }).join("")}</tbody>`;
+
+    $("#mayorPollTable").innerHTML=`<thead><tr><th>縣市</th><th>調查／委託</th><th>調查截止</th><th>樣本</th><th>結果</th><th>未表態</th><th>模型</th><th>q</th><th>來源</th></tr></thead><tbody>${[...E.mayorPolls].sort((a,b)=>b.fieldEnd.localeCompare(a.fieldEnd)).map(p=>{
+      const race=E.mayorRaces[p.county]; const values=Object.entries(p.values).map(([id,v])=>`${race.candidates.find(c=>c.id===id)?.name||id} ${v}%`).join("；");
+      const used=p.useInModel===false?`<span class="confidence low">背景</span>`:`<span class="confidence mid">納入</span>`;
+      return `<tr><td>${p.county}</td><td><b>${esc(p.pollster)}</b><br><span class="muted">${esc(p.sponsor)}</span></td><td>${p.fieldEnd}</td><td>${p.n?fmt.format(p.n):"—"}${p.moe?`<br><span class="muted">±${p.moe}%</span>`:""}</td><td>${esc(values)}<br><span class="muted">${esc(p.note||"")}</span></td><td>${p.undecided!=null?`${p.undecided}%`:"—"}</td><td>${used}</td><td>${Number(p.quality).toFixed(2)}</td><td>${external(p.url)}</td></tr>`;
+    }).join("")}</tbody>`;
+
+    $("#councilForecastTable").innerHTML=`<thead><tr><th>縣市</th><th>主要陣營</th><th>民進黨</th><th>國民黨</th><th>民眾黨</th><th>其他／無黨</th><th>基準有效票量</th><th>信心</th></tr></thead><tbody>${E.counties.map(c=>{const r=council.results[c.name]; const cell=k=>`${pct(r.shares[k])}<br><span class="muted">${fmt.format(Math.round(r.volume*r.shares[k]/100))}票</span>`;return `<tr><td><b>${c.name}</b></td><td>${partyPill(r.leader)}</td><td>${cell("DPP")}</td><td>${cell("KMT")}</td><td>${cell("TPP")}</td><td>${cell("OTHER")}</td><td>${fmt.format(r.volume)}</td><td><span class="confidence low">偏低</span></td></tr>`}).join("")}</tbody>`;
+
+    $("#councilPollTable").innerHTML=`<thead><tr><th>調查</th><th>日期</th><th>樣本</th><th>民進黨</th><th>國民黨</th><th>民眾黨</th><th>中立／無</th><th>用途</th><th>來源</th></tr></thead><tbody>${E.councilPolls.map(p=>`<tr><td><b>${esc(p.pollster)}</b><br><span class="muted">${esc(p.sponsor)}</span></td><td>${p.fieldEnd}</td><td>${p.n?fmt.format(p.n):"—"}</td><td>${p.values.DPP}%</td><td>${p.values.KMT}%</td><td>${p.values.TPP}%</td><td>${p.neutral??"—"}%</td><td>${esc(p.note)}</td><td>${external(p.url)}</td></tr>`).join("")}</tbody>`;
+
+    const pcands=Object.fromEntries(E.president.candidates.map(c=>[c.id,c]));
+    $("#presidentForecastTable").innerHTML=`<thead><tr><th>縣市</th><th>模型領先</th><th>賴清德</th><th>盧秀燕</th><th>柯文哲</th><th>領先差</th><th>基準有效票量</th><th>信心</th></tr></thead><tbody>${E.counties.map(c=>{const r=president.results[c.name]; const cell=id=>`${pct(r.shares[id])}<br><span class="muted">${fmt.format(Math.round(r.volume*r.shares[id]/100))}票</span>`;return `<tr><td><b>${c.name}</b></td><td>${partyPill(r.leader.party)} <b>${r.leader.name}</b></td><td>${cell("lai2028")}</td><td>${cell("lu2028")}</td><td>${cell("ko2028")}</td><td>${pct(r.margin)}</td><td>${fmt.format(r.volume)}</td><td><span class="confidence low">低</span></td></tr>`}).join("")}</tbody>`;
+    $("#presidentPollTable").innerHTML=`<thead><tr><th>情境／調查</th><th>日期</th><th>樣本</th><th>結果</th><th>未表態</th><th>備註</th><th>來源</th></tr></thead><tbody>${E.president.polls.map(p=>`<tr><td><b>${esc(E.president.scenarioLabel)}</b><br><span class="muted">${esc(p.pollster)}／${esc(p.sponsor)}</span></td><td>${p.fieldEnd}</td><td>${fmt.format(p.n)}</td><td>${Object.entries(p.values).map(([id,v])=>`${pcands[id].name} ${v}%`).join("；")}</td><td>${p.undecided}%</td><td>${esc(p.note)}</td><td>${external(p.url)}</td></tr>`).join("")}</tbody>`;
+    $("#presidentContext").innerHTML=E.president.contextPolls.map(p=>`<article class="context-card"><b>不納入模型的背景民調</b><p>${Object.entries(p.values).map(([k,v])=>`${esc(k)} ${v}%`).join("；")}</p><p class="muted">${esc(p.note)}</p>${external(p.url,"查看來源")}</article>`).join("");
+  }
+
+  function currentHistory(type) {
+    if(type==="mayor") {
+      const leadCounts={}; Object.values(mayor).forEach(r=>leadCounts[r.leader.party]=(leadCounts[r.leader.party]||0)+1);
+      return {date:E.asOf, label:`第一版｜民進黨領先 ${leadCounts.DPP||0}、國民黨領先 ${leadCounts.KMT||0}、其他 ${Object.values(mayor).length-(leadCounts.DPP||0)-(leadCounts.KMT||0)}`, note:"建立民調＋歷史先驗模型與22縣市地圖"};
     }
-  };
-
-  function t(key) {
-    return i18n[currentLang][key] || i18n.zh[key] || key;
+    if(type==="council") return {date:E.asOf,label:`第一版｜全國三黨結構：民進黨 ${pct(council.national.DPP)}、國民黨 ${pct(council.national.KMT)}、民眾黨 ${pct(council.national.TPP)}`,note:"正式候選人登記前採政黨總票結構模型"};
+    return {date:E.asOf,label:`第一版｜全國情境：民進黨 ${pct(president.nationalParty.DPP)}、國民黨 ${pct(president.nationalParty.KMT)}、民眾黨 ${pct(president.nationalParty.TPP)}`,note:"賴／盧／柯假設情境，低信心"};
   }
-
-  function sanitize(text) {
-    return String(text ?? "").replace(/[&<>'"]/g, (char) => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
-    }[char]));
-  }
-
-  function link(url, label, className = "") {
-    if (!url) return "";
-    return `<a class="${className}" href="${sanitize(url)}" target="_blank" rel="noopener noreferrer">${sanitize(label)}</a>`;
-  }
-
-  function text(item, field) {
-    if (currentLang === "en" && item.en && item.en[field]) return item.en[field];
-    return item[field] || "";
-  }
-
-  function dateOnly(value) {
-    if (!value) return null;
-    const date = new Date(`${value}T00:00:00+08:00`);
-    return Number.isNaN(date.getTime()) ? null : date;
-  }
-
-  function todayTaipei() {
-    const now = new Date();
-    return new Date(new Intl.DateTimeFormat("en-CA", {
-      timeZone: "Asia/Taipei",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit"
-    }).format(now) + "T00:00:00+08:00");
-  }
-
-  function eventHasEnded(item) {
-    if (item.status === "ended") return true;
-    const end = dateOnly(item.endDate);
-    return !!end && end < todayTaipei();
-  }
-
-  function getAllItems() {
-    const orgs = (DATA.organizations || []).map((item) => ({ ...item, kind: "org" }));
-    const events = (DATA.events || [])
-      .filter((item) => !eventHasEnded(item))
-      .map((item) => ({ ...item, kind: "event" }));
-    return [...orgs, ...events];
-  }
-
-  function statusKey(item) {
-    if (item.kind === "org") return "statusOrg";
-    if (item.status === "active") return "statusActive";
-    if (item.status === "planning") return "statusPlanning";
-    if (item.status === "portal") return "statusPortal";
-    return "statusUpcoming";
-  }
-
-  function statusClass(item) {
-    if (item.kind === "org") return "status-portal";
-    if (item.status === "active") return "status-active";
-    if (item.status === "planning") return "status-planning";
-    if (item.status === "portal") return "status-portal";
-    return "status-upcoming";
-  }
-
-  function matches(item) {
-    const filterOk = activeFilter === "all" || item.category === activeFilter || (activeFilter === "event" && item.kind === "event");
-    const haystack = [
-      item.name, item.englishName, item.type, item.address, item.host, item.coHost, item.demand, item.eligibility, item.time,
-      ...(item.tags || []),
-      ...(item.en ? Object.values(item.en) : [])
-    ].join(" ").toLowerCase();
-    return filterOk && haystack.includes(searchText.toLowerCase().trim());
-  }
-
-  function enableMapFallback() {
-    mapReady = false;
-    if (typeof window.TCSM_ENABLE_MAP_FALLBACK === "function") window.TCSM_ENABLE_MAP_FALLBACK();
-  }
-
-  function makeIcon(kind) {
-    if (!window.L) return null;
-    return L.divIcon({
-      className: "",
-      iconSize: [34, 34],
-      iconAnchor: [17, 34],
-      popupAnchor: [0, -30],
-      html: `<div class="custom-marker ${kind === "event" ? "marker-event" : "marker-org"}"><span>${kind === "event" ? t("eventMarker") : t("orgMarker")}</span></div>`
-    });
-  }
-
-  function setupMap() {
-    if (!window.L) {
-      enableMapFallback();
-      return;
-    }
-
-    try {
-      map = L.map("map", { zoomControl: false, preferCanvas: true }).setView(taiwanCenter, 7);
-      L.control.zoom({ position: "bottomright" }).addTo(map);
-      const tiles = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-      });
-      tiles.on("tileerror", enableMapFallback);
-      tiles.addTo(map);
-      markerLayer = L.layerGroup().addTo(map);
-      areaLayer = L.layerGroup().addTo(map);
-      mapReady = true;
-    } catch (error) {
-      enableMapFallback();
-    }
-  }
-
-  function renderStaticText() {
-    document.documentElement.lang = currentLang === "zh" ? "zh-Hant-TW" : "en";
-    document.querySelectorAll("[data-i18n]").forEach((node) => {
-      node.textContent = t(node.dataset.i18n);
-    });
-    document.querySelectorAll("[data-i18n-placeholder]").forEach((node) => {
-      node.setAttribute("placeholder", t(node.dataset.i18nPlaceholder));
-    });
-    if (langToggle) langToggle.textContent = currentLang === "zh" ? "EN" : "中";
-    if (typeof window.TCSM_ENABLE_MAP_FALLBACK === "function" && document.body.classList.contains("map-fallback-mode")) window.TCSM_ENABLE_MAP_FALLBACK();
-  }
-
-  function renderFilters() {
-    if (!filterRow) return;
-    filterRow.innerHTML = (DATA.categories || []).map((filter) => {
-      const label = currentLang === "en" ? filter.labelEn : filter.label;
-      return `<button type="button" class="filter-chip ${filter.key === activeFilter ? "active" : ""}" data-filter="${sanitize(filter.key)}">${sanitize(label)}</button>`;
-    }).join("");
-    filterRow.querySelectorAll("button").forEach((button) => {
-      button.addEventListener("click", () => {
-        activeFilter = button.dataset.filter;
-        render();
-      });
-    });
-  }
-
-  function popupHtml(item) {
-    return `
-      <p class="popup-title">${sanitize(text(item, "name"))}</p>
-      <p class="popup-meta">${sanitize(text(item, "type"))}<br>${sanitize(text(item, "address") || text(item, "time"))}</p>
-    `;
-  }
-
-  function renderMap(items) {
-    if (!mapReady || !markerLayer || !areaLayer || !window.L) return;
-    markerLayer.clearLayers();
-    areaLayer.clearLayers();
-    markerIndex.clear();
-
-    items.forEach((item) => {
-      if (typeof item.lat !== "number" || typeof item.lng !== "number") return;
-      if (item.kind === "event" && item.radiusMeters) {
-        L.circle([item.lat, item.lng], {
-          radius: item.radiusMeters,
-          weight: 1.5,
-          fillOpacity: 0.09
-        }).addTo(areaLayer);
-      }
-
-      const marker = L.marker([item.lat, item.lng], { icon: makeIcon(item.kind) })
-        .bindPopup(popupHtml(item))
-        .on("click", () => showDetail(item, true));
-      marker.addTo(markerLayer);
-      markerIndex.set(item.id, marker);
-    });
-  }
-
-  function tagsHtml(item) {
-    return `<div class="badges"><span class="status-pill ${statusClass(item)}">${sanitize(t(statusKey(item)))}</span>${(item.tags || []).map((tag) => `<span class="badge ${item.kind === "event" ? "event" : ""}">${sanitize(tag)}</span>`).join("")}</div>`;
-  }
-
-  function row(label, value) {
-    if (!value) return "";
-    return `<div><dt>${sanitize(label)}</dt><dd>${sanitize(value)}</dd></div>`;
-  }
-
-  function showDetail(item, fromMap = false) {
-    selectedItemId = item.id;
-    detailTitle.textContent = text(item, "name");
-    detailContent.innerHTML = `
-      ${tagsHtml(item)}
-      <dl>
-        ${row(t("type"), text(item, "type"))}
-        ${row(t("place"), text(item, "address"))}
-        ${row(t("host"), text(item, "host"))}
-        ${row(t("coHost"), text(item, "coHost") || (currentLang === "en" ? "See official announcement" : "依主辦方公告"))}
-        ${row(t("topic"), text(item, "demand"))}
-        ${row(t("time"), text(item, "time"))}
-        ${row(t("startDate"), item.startDate)}
-        ${row(t("endDate"), item.endDate)}
-        ${row(t("eligibility"), text(item, "eligibility"))}
-        ${row(t("status"), t(statusKey(item)))}
-        ${row(t("quality"), text(item, "locationQuality"))}
-        ${row(t("source"), text(item, "sourceLabel"))}
-        ${row(t("updated"), text(item, "freshness"))}
-      </dl>
-      <div class="detail-actions">
-        ${link(item.officialUrl, t("official"))}
-        ${link(item.signupUrl, t("signup"), "secondary")}
-        ${link(item.mapUrl, t("maps"), "secondary")}
-      </div>
-    `;
-
-    if (!fromMap && mapReady && markerIndex.has(item.id)) {
-      const marker = markerIndex.get(item.id);
-      map.setView(marker.getLatLng(), item.kind === "event" ? 15 : 16, { animate: true });
-      marker.openPopup();
-      document.getElementById("map-panel").scrollIntoView({ behavior: "smooth", block: "start" });
-    } else if (!fromMap) {
-      document.getElementById("map-panel").scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }
-
-  function renderCards(items) {
-    if (!cardGrid) return;
-    if (!items.length) {
-      cardGrid.innerHTML = `<article class="data-card"><h3>${sanitize(t("noResultTitle"))}</h3><p>${sanitize(t("noResultText"))}</p></article>`;
-      return;
-    }
-
-    cardGrid.innerHTML = items.map((item) => `
-      <article class="data-card" data-id="${sanitize(item.id)}" tabindex="0" role="button" aria-label="${sanitize(text(item, "name"))}">
-        <div class="card-meta"><span>${item.kind === "event" ? sanitize(t("kindEvent")) : sanitize(t("kindOrg"))}</span><span>${sanitize(text(item, "type"))}</span></div>
-        <h3>${sanitize(text(item, "name"))}</h3>
-        <p><span class="status-pill ${statusClass(item)}">${sanitize(t(statusKey(item)))}</span></p>
-        <p>${sanitize(text(item, "address"))}</p>
-        <p>${sanitize(text(item, "demand"))}</p>
-      </article>
-    `).join("");
-
-    cardGrid.querySelectorAll(".data-card").forEach((card) => {
-      const activate = () => {
-        const item = currentItems.find((entry) => entry.id === card.dataset.id);
-        if (item) showDetail(item);
-      };
-      card.addEventListener("click", activate);
-      card.addEventListener("keydown", (event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          activate();
-        }
-      });
-    });
+  function renderHistory(id,type) {
+    const rows=[...(E.history[type]||[]),currentHistory(type)];
+    $(id).innerHTML=`<div class="history-list">${rows.map((h,i)=>`<div class="history-item"><time>${esc(h.date)}</time><div><b>${esc(h.label)}</b><span>${esc(h.note||"")}</span></div><span>${i===rows.length-1?"目前版本":"歷史版本"}</span></div>`).join("")}</div><p class="caption">維護規則：每次更新民調／參數前，先把當前摘要寫入 election-data.js 的 history，再更新資料，歷史紀錄才不會被新模型覆蓋。</p>`;
   }
 
   function renderSources() {
-    const sourceLinks = $("#sourceLinks");
-    if (!sourceLinks) return;
-    sourceLinks.innerHTML = (DATA.sources || []).map((source) => link(source.url, currentLang === "en" && source.titleEn ? source.titleEn : source.title)).join("");
+    const src=[E.sources.linzer,E.sources.jackman,E.sources.shirani];
+    $("#scienceSources").innerHTML=src.map((s,i)=>`<a class="source-card" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer"><b>${esc(s.title)}</b><span>${i===0?"歷史／結構模型與民調動態結合":i===1?"多份民調 pooling 與 polling-house 差異":"民調總誤差、共同偏誤與額外變異"} ↗</span></a>`).join("");
+    $("#modelNote").textContent=E.model.note;
   }
 
-  function render() {
-    renderStaticText();
-    renderFilters();
-    currentItems = getAllItems().filter(matches);
-    renderMap(currentItems);
-    renderCards(currentItems);
-    renderSources();
-    if (selectedItemId) {
-      const selected = currentItems.find((item) => item.id === selectedItemId);
-      if (selected) showDetail(selected, true);
-    }
+  let geoPromise;
+  function getGeo() { return geoPromise ||= fetch(E.geojsonUrl).then(r=>{if(!r.ok)throw new Error("GeoJSON load failed");return r.json()}); }
+  function opacityByMargin(m){return m<3?.34:m<8?.48:m<15?.62:.76}
+  function createForecastMap(el, resultMap, opts={}) {
+    if(!window.L) return;
+    const map=L.map(el,{zoomControl:true,attributionControl:true}).setView([23.72,120.95],7);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+    getGeo().then(geo=>{
+      const layer=L.geoJSON(geo,{style:f=>{const n=normalizeName(f.properties.county);const r=resultMap[n];const key=opts.leaderKey?opts.leaderKey(r):r?.leader?.party||r?.leader;return {color:"#d9e5eb",weight:.7,fillColor:r?party(key).color:"#59646d",fillOpacity:r?opacityByMargin(r.margin):.2}},onEachFeature:(f,l)=>{
+        const n=normalizeName(f.properties.county);const r=resultMap[n];if(!r)return;const html=opts.popup?opts.popup(r):`<div class="forecast-popup"><b>${esc(n)}</b></div>`;l.bindPopup(html);l.bindTooltip(n,{sticky:true,className:"map-tooltip"});l.on({mouseover:e=>e.target.setStyle({weight:2}),mouseout:e=>layer.resetStyle(e.target)});
+      }}).addTo(map);map.fitBounds(layer.getBounds(),{padding:[8,8]});
+    }).catch(()=>{const node=document.getElementById(el);node?.insertAdjacentHTML("afterend",'<p class="notice warning">行政界線暫時載入失敗；預測表仍可正常使用。</p>')});
+    return map;
   }
 
-  function setupEvents() {
-    if (searchInput) {
-      searchInput.addEventListener("input", (event) => {
-        searchText = event.target.value;
-        render();
-      });
-    }
-    if (focusTaiwan) {
-      focusTaiwan.addEventListener("click", () => {
-        if (mapReady && map) map.setView(taiwanCenter, 7, { animate: true });
-        else enableMapFallback();
-      });
-    }
-    if (langToggle) {
-      langToggle.addEventListener("click", () => {
-        currentLang = currentLang === "zh" ? "en" : "zh";
-        localStorage.setItem(storageKey, currentLang);
-        render();
-      });
-    }
+  function setupElectionMaps() {
+    $("#mayorLegend").innerHTML=legendHtml(["DPP","KMT","TPP","IND","OTHER"]);
+    $("#councilLegend").innerHTML=legendHtml(["DPP","KMT","TPP","OTHER"]);
+    $("#presidentLegend").innerHTML=legendHtml(["DPP","KMT","TPP"]);
+    createForecastMap("mayorMap",mayor,{popup:r=>`<div class="forecast-popup"><b>${r.county}</b><div>${partyPill(r.leader.party)} ${esc(r.leader.name)} 領先 ${pct(r.margin)}</div><hr>${sortedShares(r.forecast).map(([id,s])=>{const c=r.race.candidates.find(x=>x.id===id);return `<div class="row"><span>${esc(c.name)}</span><b>${pct(s)}</b></div>`}).join("")}<small>${r.polls.length?`${r.polls.length}份可比民調｜${r.confidence.label}信心`:"結構估計｜低信心"}</small></div>`});
+    createForecastMap("councilMap",council.results,{leaderKey:r=>r.leader,popup:r=>`<div class="forecast-popup"><b>${r.county}</b>${sortedShares(r.shares).map(([k,s])=>`<div class="row"><span>${party(k).label}</span><b>${pct(s)}</b></div>`).join("")}<small>政黨總票結構，非席次預測</small></div>`});
+    createForecastMap("presidentMap",president.results,{popup:r=>`<div class="forecast-popup"><b>${r.county}</b>${E.president.candidates.map(c=>`<div class="row"><span>${c.name}</span><b>${pct(r.shares[c.id])}</b></div>`).join("")}<small>2028假設情境｜低信心</small></div>`});
   }
 
-  window.addEventListener("DOMContentLoaded", () => {
-    setupMap();
-    setupEvents();
-    render();
-  });
+  function civicItems() {
+    const today=new Date(`${E.asOf}T00:00:00+08:00`);
+    const orgs=(C.organizations||[]).map(x=>({...x,kind:"org"}));
+    const events=(C.events||[]).filter(x=>!x.endDate||new Date(`${x.endDate}T23:59:59+08:00`)>=today).map(x=>({...x,kind:"event"}));
+    return [...orgs,...events];
+  }
+  let civicMap,civicLayer,civicFilter="all",civicQuery="";
+  function matchesCivic(x){const filter=civicFilter==="all"||x.category===civicFilter||(civicFilter==="event"&&x.kind==="event");const hay=[x.name,x.englishName,x.type,x.address,x.host,x.demand,...(x.tags||[])].join(" ").toLowerCase();return filter&&hay.includes(civicQuery.toLowerCase())}
+  function renderCivic() {
+    const items=civicItems().filter(matchesCivic); $("#civicCount").textContent=`${items.length} 筆`;
+    $("#civicCards").innerHTML=items.length?items.map(x=>`<article class="data-card"><span class="source-badge">${x.kind==="event"?"公開活動":"公開組織"}</span><h3>${esc(x.name)}</h3><p>${esc(x.type||"")}</p><p>${esc(x.address||x.area||x.demand||"")}</p><div class="tags">${(x.tags||[]).slice(0,5).map(t=>`<span>${esc(t)}</span>`).join("")}</div>${external(x.officialUrl||x.signupUrl||x.sourceUrl,"官方／查證")}</article>`).join(""):`<p class="no-data">沒有符合條件的公開資料。</p>`;
+    if(civicLayer){civicLayer.clearLayers();items.forEach(x=>{if(Number.isFinite(x.lat)&&Number.isFinite(x.lng)){const color=x.kind==="event"?"#f0c46b":"#66d2c7";L.circleMarker([x.lat,x.lng],{radius:7,color,fillColor:color,fillOpacity:.82,weight:1}).bindPopup(`<b>${esc(x.name)}</b><br>${esc(x.address||x.area||"")}<br>${external(x.officialUrl||x.signupUrl||x.sourceUrl)}`).addTo(civicLayer)}})}
+  }
+  function setupCivic() {
+    const cats=C.categories||[]; $("#civicFilters").innerHTML=cats.map(c=>`<button class="filter-button ${c.key==="all"?"active":""}" data-filter="${esc(c.key)}">${esc(c.label)}</button>`).join("");
+    if(window.L){civicMap=L.map("civicMap").setView([23.72,120.95],7);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:'&copy; OpenStreetMap contributors'}).addTo(civicMap);civicLayer=L.layerGroup().addTo(civicMap)}
+    $("#civicFilters").addEventListener("click",e=>{const b=e.target.closest("[data-filter]");if(!b)return;civicFilter=b.dataset.filter;$("#civicFilters").querySelectorAll("button").forEach(x=>x.classList.toggle("active",x===b));renderCivic()});
+    $("#civicSearch").addEventListener("input",e=>{civicQuery=e.target.value;renderCivic()});
+    $("#civicReset").addEventListener("click",()=>civicMap?.setView([23.72,120.95],7));
+    $("#civicSources").innerHTML=(C.sources||[]).map(s=>`<a class="source-card" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer"><b>${esc(s.title)}</b><span>公開查證來源 ↗</span></a>`).join("");renderCivic();
+  }
+
+  function setupNav() {
+    const nav=$("#mainNav"),menu=$("#menuButton");menu.addEventListener("click",()=>nav.classList.toggle("open"));nav.addEventListener("click",()=>nav.classList.remove("open"));
+    document.querySelectorAll("[data-jump]").forEach(b=>b.addEventListener("click",()=>location.hash=b.dataset.jump));
+    const sections=[...document.querySelectorAll(".page-section")];const links=[...nav.querySelectorAll("a")];const observer=new IntersectionObserver(entries=>{const v=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(!v)return;links.forEach(a=>a.classList.toggle("active",a.getAttribute("href")==`#${v.target.id}`))},{rootMargin:"-25% 0px -60% 0px",threshold:[.05,.2,.5]});sections.forEach(s=>observer.observe(s));
+  }
+
+  function init(){renderSummary();renderTables();renderHistory("#mayorHistory","mayor");renderHistory("#councilHistory","council");renderHistory("#presidentHistory","president");renderSources();setupElectionMaps();setupCivic();setupNav()}
+  init();
 })();
