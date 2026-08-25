@@ -1,252 +1,90 @@
 <!doctype html>
 <html lang="zh-Hant-TW">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#061826" />
-  <meta name="description" content="台灣公民與主權地圖｜Taiwan Civic &amp; Sovereignty Map：用公開資料整理台灣民主、主權、公民倡議相關組織、活動入口與查證來源。" />
-  <title>台灣公民與主權地圖｜Taiwan Civic &amp; Sovereignty Map</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1826">
+  <meta name="description" content="台灣公民與主權地圖：2026縣市長、縣市議員、2028總統大選民調彙整、透明票數預測模型與主權活動公開資訊。">
+  <title>台灣公民與主權地圖｜選舉預測與主權活動資訊</title>
   <link rel="preconnect" href="https://unpkg.com" crossorigin>
   <link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="./styles.css" />
-  <style>
-    .map-fallback-card{display:none;position:absolute;inset:1rem;z-index:5;border:1px solid rgba(255,255,255,.18);border-radius:24px;background:rgba(6,24,38,.92);backdrop-filter:blur(16px);color:#fff;padding:1.2rem;box-shadow:0 24px 80px rgba(0,0,0,.3);overflow:auto}.map-fallback-card h2{margin:.2rem 0 .55rem;font-size:clamp(1.25rem,5vw,2rem)}.map-fallback-card p{line-height:1.65;color:rgba(255,255,255,.82)}.map-fallback-card .mini-list{display:grid;gap:.65rem;margin-top:1rem}.map-fallback-card .mini-item{border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:.8rem;background:rgba(255,255,255,.08)}.map-fallback-card .mini-item b{display:block;margin-bottom:.25rem}.map-fallback-card .mini-item span{display:block;color:rgba(255,255,255,.75);font-size:.92rem}.map-fallback-mode #map{min-height:420px;background:radial-gradient(circle at 18% 20%,rgba(77,171,247,.35),transparent 30%),radial-gradient(circle at 80% 25%,rgba(255,196,87,.25),transparent 34%),linear-gradient(135deg,#061826,#0b2d48 60%,#10273f)}.map-fallback-mode .map-fallback-card{display:block}.data-health{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:.75rem;max-width:1180px;margin:0 auto 1.25rem;padding:0 1rem}.data-health-card{border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:1rem;background:rgba(255,255,255,.08);box-shadow:0 20px 60px rgba(0,0,0,.18);backdrop-filter:blur(14px)}.data-health-card strong{display:block;font-size:clamp(1.45rem,5vw,2.15rem);letter-spacing:-.04em}.data-health-card span{display:block;color:rgba(255,255,255,.78);font-size:.92rem;line-height:1.45}.data-stamp{max-width:1180px;margin:-.35rem auto 1.15rem;padding:0 1rem}.data-stamp-card{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.7rem;border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:.9rem 1rem;background:linear-gradient(135deg,rgba(92,225,230,.14),rgba(255,255,255,.07));color:rgba(255,255,255,.86);box-shadow:0 20px 60px rgba(0,0,0,.14);backdrop-filter:blur(14px)}.data-stamp-card b{color:#fff}.data-stamp-card span{line-height:1.45}.map-fallback-card .fallback-tip{margin-top:.8rem;border-top:1px solid rgba(255,255,255,.14);padding-top:.8rem}@media(max-width:1100px){.data-health{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:900px){.data-health{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:720px){.map-fallback-card{inset:.7rem;border-radius:20px;padding:1rem}.map-fallback-card .mini-list{grid-template-columns:1fr}.map-fallback-mode #map{min-height:480px}.data-health{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:.9rem}.data-health-card{padding:.9rem}.data-stamp{margin:-.25rem auto .9rem}.data-stamp-card{display:block}.data-stamp-card span{display:block;margin-top:.35rem}}@media(max-width:420px){.data-health{grid-template-columns:1fr}}
-  </style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <header class="topbar" aria-label="網站標題與導覽">
-    <a class="brand" href="#home" aria-label="回到首頁">
-      <span class="brand-mark">台</span>
-      <span>
-        <strong data-i18n="brandTitle">台灣公民與主權地圖</strong>
-        <small>Taiwan Civic &amp; Sovereignty Map</small>
-      </span>
-    </a>
-    <nav class="quick-nav" aria-label="快速導覽">
-      <a href="#map-panel" data-i18n="navMap">地圖</a>
-      <a href="#list-panel" data-i18n="navList">資料卡</a>
-      <a href="#source-panel" data-i18n="navSources">查證來源</a>
-      <a href="#maintain-panel" data-i18n="navUpdate">更新方式</a>
+  <header class="topbar">
+    <a class="brand" href="#mayor"><span class="brand-mark">台</span><span><strong>台灣公民與主權地圖</strong><small>Taiwan Civic & Sovereignty Map</small></span></a>
+    <button id="menuButton" class="menu-button" type="button" aria-label="開啟導覽">☰</button>
+    <nav id="mainNav" class="main-nav" aria-label="主要導覽">
+      <a href="#mayor">2026縣市長選舉</a>
+      <a href="#council">2026縣市議員選舉</a>
+      <a href="#president">2028總統大選</a>
+      <a href="#method">票數預測公式</a>
+      <a href="#sovereignty">主權活動資訊</a>
     </nav>
   </header>
 
-  <div class="floating-actions" aria-label="固定快速選項">
-    <a class="float-action" href="https://taiwan-civic-sovereignty-map.vercel.app/" target="_blank" rel="noopener noreferrer" aria-label="Instagram 入口">IG</a>
-    <button class="float-action" id="langToggle" type="button" aria-label="切換中文英文">EN</button>
-  </div>
-
-  <main id="home">
-    <section class="hero" aria-label="網站介紹">
-      <div class="hero-copy">
-        <p class="eyebrow" data-i18n="heroEyebrow">公開資料・守法參與・快速查證</p>
-        <h1 data-i18n="heroTitle">用一張地圖，看懂台灣民主、主權、公民倡議的公開資訊。</h1>
-        <p class="hero-text" data-i18n="heroText">這裡整理可公開查證的政黨、協會、基金會、活動入口與新聞來源。重點是讓獨派朋友、中立讀者、守法公民與年輕人都能快速理解：誰在辦、在哪裡、怎麼查、參與前要注意什麼。</p>
-        <div class="hero-actions">
-          <a class="primary-button" href="#map-panel" data-i18n="heroPrimary">開始看地圖</a>
-          <button class="ghost-button" id="focusTaiwan" type="button" data-i18n="heroSecondary">地圖回台灣</button>
-        </div>
+  <main>
+    <section id="mayor" class="page-section election-page">
+      <div class="hero compact">
+        <div><p class="eyebrow">2026 LOCAL ELECTION FORECAST</p><h1>2026縣市長選舉</h1><p>整合公開民調、2024總統票結構與2022地方選舉有效票量，產生22縣市的條件式得票預測。</p></div>
+        <div class="status-card"><b>模型資料日</b><strong id="mayorAsOf">—</strong><span>投票日 2026/11/28</span></div>
       </div>
-      <aside class="trust-card" aria-label="網站守則">
-        <h2 data-i18n="trustTitle">查得到、看得懂、守得住界線</h2>
-        <p data-i18n="trustText">只整理公開來源，不放私人住址、不公開聚會、不做個人追蹤。活動狀態會依日期自動整理，已結束活動不顯示，避免資訊過期。</p>
-        <div class="trust-pills">
-          <span data-i18n="pill1">公開可查</span>
-          <span data-i18n="pill2">守法安全</span>
-          <span data-i18n="pill3">手機友善</span>
-          <span data-i18n="pill4">資訊不迷路</span>
-        </div>
-      </aside>
+      <div id="candidateNotice" class="notice"></div>
+      <div class="summary-grid" id="mayorSummary"></div>
+      <section class="panel"><div class="panel-heading"><div><p class="eyebrow">CHOROPLETH</p><h2>縣市長預測地圖</h2></div><div class="legend" id="mayorLegend"></div></div><div id="mayorMap" class="map"></div><p class="caption">底圖：OpenStreetMap；行政界線：twgeojson。顏色代表目前模型領先陣營，透明度隨領先差距增加。</p></section>
+      <section class="panel"><div class="panel-heading"><div><p class="eyebrow">FORECAST TABLE</p><h2>票數預測結果</h2></div><button class="small-button" data-jump="#method">查看公式</button></div><div class="table-wrap"><table id="mayorForecastTable"></table></div></section>
+      <section class="panel"><div class="panel-heading"><div><p class="eyebrow">POLL ARCHIVE</p><h2>公開民調資料</h2></div></div><p class="muted">優先收錄「目前主要人選組合」可比較的公開民調。未表態者不直接分配，而是在模型中先做已表態候選人比例正規化；委託／內參來源會降低品質權重。</p><div class="table-wrap"><table id="mayorPollTable"></table></div></section>
+      <section class="panel"><div class="panel-heading"><div><p class="eyebrow">HISTORY</p><h2>歷史預測</h2></div></div><div id="mayorHistory"></div></section>
     </section>
 
-    <section class="control-strip" aria-label="搜尋與篩選">
-      <label class="search-box">
-        <span data-i18n="searchLabel">搜尋組織、地址、活動、主題</span>
-        <input id="searchInput" type="search" data-i18n-placeholder="searchPlaceholder" placeholder="例如：制憲、青年、台北、g0v、活動通" autocomplete="off" />
-      </label>
-      <div class="filter-row" id="filterRow" aria-label="資料篩選"></div>
+    <section id="council" class="page-section election-page">
+      <div class="hero compact"><div><p class="eyebrow">2026 COUNCIL VOTE STRUCTURE</p><h1>2026縣市議員選舉</h1><p>正式候選人登記前，先做各縣市「政黨總得票結構」預測，不製造候選人席次的假精準。</p></div><div class="status-card"><b>預測單位</b><strong>政黨總票</strong><span>非席次預測</span></div></div>
+      <div class="notice warning">縣市議員採多席次選區與候選人個人票競爭；目前頁面預測民進黨、國民黨、民眾黨與其他／無黨的總得票結構。待正式候選人與選區名單確定後，才適合升級到候選人／席次模型。</div>
+      <div class="summary-grid" id="councilSummary"></div>
+      <section class="panel"><div class="panel-heading"><div><p class="eyebrow">CHOROPLETH</p><h2>議員政黨得票結構地圖</h2></div><div class="legend" id="councilLegend"></div></div><div id="councilMap" class="map"></div><p class="caption">顏色代表預測主要政黨；「其他／無黨」保留結構性票源，不等於單一政黨。</p></section>
+      <section class="panel"><div class="panel-heading"><div><p class="eyebrow">FORECAST TABLE</p><h2>各縣市政黨票數預測</h2></div></div><div class="table-wrap"><table id="councilForecastTable"></table></div></section>
+      <section class="panel"><div class="panel-heading"><div><p class="eyebrow">NATIONAL SIGNALS</p><h2>全國政黨支持度民調</h2></div></div><p class="muted">這些題目是「政黨支持度」，不是「議員投票意向」，因此模型只給35%混合權重，主要用來估計2024後的全國擺動方向。</p><div class="table-wrap"><table id="councilPollTable"></table></div></section>
+      <section class="panel"><div class="panel-heading"><div><p class="eyebrow">HISTORY</p><h2>歷史預測</h2></div></div><div id="councilHistory"></div></section>
     </section>
 
-    <section class="data-health" id="dataHealth" aria-label="資料狀態摘要"></section>
-    <section class="data-stamp" id="dataStamp" aria-label="資料最後檢查日期"></section>
-
-    <section class="map-layout" id="map-panel" aria-label="台灣地圖與資訊面板">
-      <div class="map-shell">
-        <div id="map" role="application" aria-label="OpenStreetMap 台灣組織與活動地圖"></div>
-        <div class="map-fallback-card" id="mapFallback" role="status" aria-live="polite">
-          <p class="eyebrow" data-fallback-zh="地圖暫時不穩・資料照樣可查" data-fallback-en="Map is unstable · data stays available">地圖暫時不穩・資料照樣可查</p>
-          <h2 data-fallback-zh="先看重點清單，不讓畫面卡住。" data-fallback-en="Browse the key list first — no frozen screen.">先看重點清單，不讓畫面卡住。</h2>
-          <p data-fallback-zh="如果地圖底圖或地圖元件暫時載入失敗，這裡會直接切到公開資料清單。你仍可搜尋組織、活動、位置、主題與查證來源，出發前再回官方公告確認。" data-fallback-en="If the map layer or map view is temporarily unavailable, this page switches to a public-data list. You can still search groups, events, places, topics, and verification sources, then double-check official notices before going.">如果地圖底圖或地圖元件暫時載入失敗，這裡會直接切到公開資料清單。你仍可搜尋組織、活動、位置、主題與查證來源，出發前再回官方公告確認。</p>
-          <div class="mini-list" id="fallbackMiniList"></div>
-          <p class="fallback-tip" data-fallback-zh="小提醒：精準地址只顯示公開來源能查到的位置；不確定的位置會標成待覆核，避免誤導。" data-fallback-en="Heads up: precise places are shown only when public sources support them. Unclear places stay under review to avoid misleading people.">小提醒：精準地址只顯示公開來源能查到的位置；不確定的位置會標成待覆核，避免誤導。</p>
-        </div>
-        <div class="map-legend" aria-label="圖例">
-          <span><i class="dot org"></i><b data-i18n="legendOrg">公開組織</b></span>
-          <span><i class="dot event"></i><b data-i18n="legendEvent">活動／入口</b></span>
-          <span><i class="dot area"></i><b data-i18n="legendArea">活動範圍</b></span>
-        </div>
-      </div>
-      <aside class="detail-panel" aria-label="點選項目詳細資訊">
-        <div class="panel-head">
-          <p class="eyebrow" data-i18n="detailEyebrow">點一下，看重點</p>
-          <h2 id="detailTitle" data-i18n="detailTitle">點地圖上的標記看詳細資訊</h2>
-        </div>
-        <div id="detailContent" class="detail-content">
-          <p data-i18n="detailText">你可以看到公開地址、活動範圍、主辦方、協辦方、主題、日期、參加資格與查證連結。出發前請再看一次官方公告，才不會白跑。</p>
-        </div>
-      </aside>
+    <section id="president" class="page-section election-page">
+      <div class="hero compact"><div><p class="eyebrow">2028 PRESIDENTIAL SCENARIO</p><h1>2028總統大選</h1><p>距正式提名尚遠，本頁只做「公開民調中已出現的三人情境」模型，不宣稱這就是最終候選人名單。</p></div><div class="status-card"><b>目前模式</b><strong>情境模擬</strong><span>非正式候選人預測</span></div></div>
+      <div class="notice warning">2028總統候選人尚未正式提名。模型目前使用「賴清德／盧秀燕／柯文哲」公開假設題，並以較低民調權重與2024縣市基準混合；人選變動時應另開新情境，不應直接沿用。</div>
+      <div class="summary-grid" id="presidentSummary"></div>
+      <section class="panel"><div class="panel-heading"><div><p class="eyebrow">CHOROPLETH</p><h2>2028情境縣市預測地圖</h2></div><div class="legend" id="presidentLegend"></div></div><div id="presidentMap" class="map"></div><p class="caption">先估全國情境支持，再以2024縣市相對強弱做 proportional swing 分配；越遠離投票日，結果越應視為情境而非預言。</p></section>
+      <section class="panel"><div class="panel-heading"><div><p class="eyebrow">FORECAST TABLE</p><h2>縣市票數預測結果</h2></div></div><div class="table-wrap"><table id="presidentForecastTable"></table></div></section>
+      <section class="panel"><div class="panel-heading"><div><p class="eyebrow">POLL ARCHIVE</p><h2>2028公開民調與情境資料</h2></div></div><div class="table-wrap"><table id="presidentPollTable"></table></div><div id="presidentContext" class="context-cards"></div></section>
+      <section class="panel"><div class="panel-heading"><div><p class="eyebrow">HISTORY</p><h2>歷史預測</h2></div></div><div id="presidentHistory"></div></section>
     </section>
 
-    <section class="list-section" id="list-panel" aria-label="資料卡片列表">
-      <div class="section-title">
-        <p class="eyebrow" data-i18n="cardsEyebrow">分類切換，資訊不塞車</p>
-        <h2 data-i18n="cardsTitle">公開資料卡</h2>
-        <p data-i18n="cardsText">資料量增加時，請用上方分類與搜尋快速切換；地圖只顯示目前篩選結果，手機瀏覽也能保持順。</p>
+    <section id="method" class="page-section">
+      <div class="hero compact"><div><p class="eyebrow">TRANSPARENT MODEL</p><h1>票數預測公式</h1><p>把「學術上有依據的設計原則」與「本站可調工程參數」分開公開，讓每次更新都能被重算、被質疑、被改進。</p></div><div class="status-card"><b>核心原則</b><strong>透明可重算</strong><span>不把民調當選舉結果</span></div></div>
+      <div class="formula-grid">
+        <article class="formula-card"><span>01</span><h2>已表態比例正規化</h2><code>d<sub>jc</sub> = p<sub>jc</sub> / Σ p<sub>jk</sub></code><p>先排除未決定、不投票等選項，只估候選人之間的相對比例；不代表未表態者真的會照此分配。</p></article>
+        <article class="formula-card"><span>02</span><h2>民調權重</h2><code>w<sub>j</sub> = q<sub>j</sub> × √(n<sub>j</sub>/1000) × 2<sup>−age/H</sup></code><p>樣本較大、來源透明、日期較新的民調權重較高。H：地方120天、總統240天；q為本站透明品質係數。</p></article>
+        <article class="formula-card"><span>03</span><h2>民調彙整</h2><code>P<sub>c</sub> = Σ(w<sub>j</sub>d<sub>jc</sub>) / Σw<sub>j</sub></code><p>不單押一份民調；同一選舉有多份民調時做加權 pooling。</p></article>
+        <article class="formula-card"><span>04</span><h2>民調 × 歷史先驗</h2><code>F<sub>c</sub> = λP<sub>c</sub> + (1−λ)B<sub>c</sub></code><p>B以2024縣市總統票結構為主要先驗。2026地方選舉λ會隨接近投票日提高；2028目前固定較低。</p></article>
+        <article class="formula-card"><span>05</span><h2>縣市擺動</h2><code>R<sub>rp</sub> ∝ V<sub>2024,rp</sub> × (F<sub>p</sub>/V<sub>2024,p</sub>)</code><p>2028與議員政黨票把全國擺動套到各縣市，再重新正規化，保留地方相對強弱。</p></article>
+        <article class="formula-card"><span>06</span><h2>條件式票數換算</h2><code>Votes<sub>c</sub> = Share<sub>c</sub> × ValidVotes<sub>baseline</sub></code><p>2026用2022同類選舉有效票量；2028用2024總統有效票量。這不是投票率或選舉人數模型。</p></article>
       </div>
-      <div class="card-grid" id="cardGrid"></div>
+      <section class="panel"><div class="panel-heading"><div><p class="eyebrow">ACADEMIC BASIS</p><h2>科學文獻依據</h2></div></div><div id="scienceSources" class="source-grid"></div></section>
+      <section class="panel"><h2>哪些是論文支持、哪些是本站參數？</h2><div class="two-col"><div><h3>文獻支持的方向</h3><ul><li>多份民調應彙整，而非只取最新一份。</li><li>民調機構可能有 house effects，抽樣誤差也不是全部誤差。</li><li>歷史／結構模型與民調可動態結合，接近投票日時民調通常更有資訊。</li></ul></div><div><h3>本站自行設定、可調參數</h3><ul><li>地方民調半衰期120天、總統240天。</li><li>來源品質 q = 0.75～1.00。</li><li>2028情境民調混合42%；議員政黨支持度混合35%。</li><li>議員「其他／無黨」結構保留比例。</li></ul></div></div><p class="notice subtle" id="modelNote"></p></section>
     </section>
 
-    <section class="source-section" id="source-panel" aria-label="資料來源與守法界線">
-      <div class="source-card">
-        <h2 data-i18n="sourceTitle">可查證來源清單</h2>
-        <p data-i18n="sourceText">資料優先參考政府登記、政黨官網、組織官網、公開活動頁、公開新聞與事實查核平台。社群貼文可當線索，正式地址與活動細節仍以官方公告為準。</p>
-        <div class="source-links" id="sourceLinks"></div>
-      </div>
-      <div class="source-card soft">
-        <h2 data-i18n="boundaryTitle">活動狀態怎麼判斷？</h2>
-        <p data-i18n="boundaryText">已結束活動會自動隱藏；尚未開始、籌備中或報名中的活動，會跟公開活動一起顯示。若只有入口頁，會標成「活動入口」，不假裝成單一場次。</p>
-      </div>
-    </section>
-
-    <section class="maintain-section" id="maintain-panel" aria-label="更新方式">
-      <div>
-        <p class="eyebrow" data-i18n="maintainEyebrow">給維護者</p>
-        <h2 data-i18n="maintainTitle">每筆資料都要能回到公開來源</h2>
-        <p data-i18n="maintainText">新增資料時，請同時放入名稱、公開位置或活動範圍、主辦方、協辦方、開始日期、結束日期、參加資格、查證連結與更新狀態。地址不確定就先標成待覆核，不要硬放精準點。</p>
-      </div>
-      <ol class="steps">
-        <li data-i18n="step1">先確認來源是否公開、合法、可追溯。</li>
-        <li data-i18n="step2">再確認地點是否為公開地址或公開活動範圍。</li>
-        <li data-i18n="step3">活動結束後，請填入結束日期；網站會自動不顯示。</li>
-      </ol>
+    <section id="sovereignty" class="page-section">
+      <div class="hero compact"><div><p class="eyebrow">CIVIC & SOVEREIGNTY INFO</p><h1>主權活動資訊</h1><p>原本的「地圖、資料卡、查證來源、更新方式」合併成同一頁；原始公開資料集保留，不另外複製。</p></div><div class="status-card"><b>資料原則</b><strong>公開可查</strong><span>不追蹤私人行程</span></div></div>
+      <section class="panel"><div class="panel-heading"><div><p class="eyebrow">PUBLIC MAP</p><h2>公開組織與活動地圖</h2></div><button id="civicReset" class="small-button">地圖回台灣</button></div><div class="civic-controls"><input id="civicSearch" type="search" placeholder="搜尋名稱、位置、主題"><div id="civicFilters" class="filter-row"></div></div><div id="civicMap" class="map civic-map"></div></section>
+      <section class="panel"><div class="panel-heading"><div><p class="eyebrow">DATA CARDS</p><h2>資料卡</h2></div><span id="civicCount" class="count-pill">0 筆</span></div><div id="civicCards" class="card-grid"></div></section>
+      <section class="panel"><div class="panel-heading"><div><p class="eyebrow">VERIFICATION</p><h2>查證來源</h2></div></div><div id="civicSources" class="source-grid"></div></section>
+      <section class="panel"><div class="panel-heading"><div><p class="eyebrow">MAINTENANCE</p><h2>更新方式</h2></div></div><div class="two-col"><div><h3>每筆資料至少要有</h3><ul><li>公開名稱與類別</li><li>公開位置／活動範圍</li><li>主辦方、日期與參加條件</li><li>可回溯的官方或公開來源</li></ul></div><div><h3>安全與品質</h3><ul><li>不放私人住址、不公開聚會、不做個人追蹤。</li><li>地址不確定就不畫精準點。</li><li>已結束活動由日期自動排除。</li><li>選舉與主權活動資料分檔維護，避免互相污染。</li></ul></div></div></section>
     </section>
   </main>
 
-  <footer class="footer">
-    <p data-i18n="footerText">台灣公民與主權地圖｜公開資料整理，不追蹤私人行程。</p>
-  </footer>
-
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" onerror="window.TCSM_MAP_SCRIPT_FAILED=true"></script>
-  <script src="./data.js" onerror="window.TCSM_DATA_FAILED=true"></script>
-  <script>
-    (function () {
-      function esc(text) {
-        return String(text || "").replace(/[&<>\"']/g, function (ch) {
-          return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch];
-        });
-      }
-      function currentLang() {
-        return localStorage.getItem("tcsm-lang") === "en" ? "en" : "zh";
-      }
-      function itemText(item, field) {
-        return currentLang() === "en" && item.en && item.en[field] ? item.en[field] : item[field] || "";
-      }
-      function todayTaipei() {
-        return new Date(new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Taipei", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()) + "T00:00:00+08:00");
-      }
-      function isEndedEvent(item) {
-        if (item.status === "ended") return true;
-        if (!item.endDate) return false;
-        var end = new Date(item.endDate + "T00:00:00+08:00");
-        return !Number.isNaN(end.getTime()) && end < todayTaipei();
-      }
-      function activeItems() {
-        var data = window.TCSM_DATA || { organizations: [], events: [] };
-        var orgs = data.organizations.map(function (item) { return Object.assign({ kind: "org" }, item); });
-        var events = data.events.filter(function (item) { return !isEndedEvent(item); }).map(function (item) { return Object.assign({ kind: "event" }, item); });
-        return orgs.concat(events);
-      }
-      function needsLocationReview(item) {
-        var quality = String(item.locationQuality || "") + " " + String(item.freshness || "");
-        var qualityEn = item.en ? String(item.en.locationQuality || "") + " " + String(item.en.freshness || "") : "";
-        var hasPoint = typeof item.lat === "number" && typeof item.lng === "number";
-        return !hasPoint || /待覆核|不確定|uncertain|review/i.test(quality + " " + qualityEn);
-      }
-      function setFallbackText() {
-        var lang = currentLang();
-        document.querySelectorAll("[data-fallback-zh]").forEach(function (node) {
-          node.textContent = lang === "en" ? node.getAttribute("data-fallback-en") : node.getAttribute("data-fallback-zh");
-        });
-      }
-      function renderFallback() {
-        setFallbackText();
-        var list = document.getElementById("fallbackMiniList");
-        if (!list) return;
-        var items = activeItems().slice(0, 8);
-        if (!items.length) {
-          list.innerHTML = '<div class="mini-item"><b>' + (currentLang() === "en" ? "Public data list is still available below" : "下方公開資料清單仍可使用") + '</b><span>' + (currentLang() === "en" ? "Use search and categories to continue browsing." : "請使用搜尋與分類繼續查詢。") + '</span></div>';
-          return;
-        }
-        list.innerHTML = items.map(function (item) {
-          return '<div class="mini-item"><b>' + esc(itemText(item, "name")) + '</b><span>' + esc(itemText(item, "address") || itemText(item, "time")) + '</span><span>' + esc(itemText(item, "sourceLabel")) + '</span></div>';
-        }).join("");
-      }
-      function renderHealth() {
-        var box = document.getElementById("dataHealth");
-        if (!box) return;
-        var data = window.TCSM_DATA || { organizations: [], events: [], sources: [] };
-        var items = activeItems();
-        var orgCount = (data.organizations || []).length;
-        var allEvents = data.events || [];
-        var eventCount = items.filter(function (item) { return item.kind === "event"; }).length;
-        var sourceCount = (data.sources || []).length;
-        var mappedCount = items.filter(function (item) { return typeof item.lat === "number" && typeof item.lng === "number"; }).length;
-        var reviewCount = items.filter(needsLocationReview).length;
-        var hiddenEndedCount = allEvents.filter(isEndedEvent).length;
-        var zh = currentLang() === "zh";
-        var cards = [
-          { value: orgCount, label: zh ? "公開組織入口" : "public group entries" },
-          { value: eventCount, label: zh ? "未結束活動與入口" : "active events and portals" },
-          { value: sourceCount, label: zh ? "查證來源連結" : "verification source links" },
-          { value: mappedCount, label: zh ? "已有公開位置可查" : "mapped public locations" },
-          { value: reviewCount, label: zh ? "待覆核定位" : "locations under review" },
-          { value: hiddenEndedCount, label: zh ? "已自動隱藏" : "ended items hidden" }
-        ];
-        box.innerHTML = cards.map(function (card) { return '<article class="data-health-card"><strong>' + esc(card.value) + '</strong><span>' + esc(card.label) + '</span></article>'; }).join("");
-      }
-      function renderStamp() {
-        var box = document.getElementById("dataStamp");
-        if (!box) return;
-        var data = window.TCSM_DATA || {};
-        var updatedAt = data.updatedAt || "";
-        var zh = currentLang() === "zh";
-        var label = zh ? "資料最後檢查" : "Last public-data check";
-        var note = zh ? "地點、活動與查證連結仍建議以官方公告為準。" : "Places, events, and links should still be verified through official notices.";
-        box.innerHTML = '<div class="data-stamp-card"><b>' + esc(label) + '：' + esc(updatedAt || (zh ? "待補" : "to be added")) + '</b><span>' + esc(note) + '</span></div>';
-      }
-      function renderAllStatus() {
-        renderFallback();
-        renderHealth();
-        renderStamp();
-      }
-      function enableFallback() {
-        document.body.classList.add("map-fallback-mode");
-        renderAllStatus();
-      }
-      window.TCSM_ENABLE_MAP_FALLBACK = enableFallback;
-      window.addEventListener("error", function (event) {
-        if (String(event.message || "").includes("L is not defined") || String(event.filename || "").includes("leaflet")) enableFallback();
-      }, true);
-      document.addEventListener("click", function (event) {
-        if (event.target && event.target.id === "langToggle") setTimeout(renderAllStatus, 0);
-      });
-      setTimeout(function () {
-        renderHealth();
-        renderStamp();
-        if (!window.L || window.TCSM_MAP_SCRIPT_FAILED || window.TCSM_DATA_FAILED) enableFallback();
-      }, 3200);
-    })();
-  </script>
+  <footer><strong>台灣公民與主權地圖</strong><span>公開資料整理與透明模型；預測不是投票建議，也不是選舉結果。</span></footer>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="./data.js"></script>
+  <script src="./election-data.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>
