@@ -138,10 +138,22 @@ if (window.ELECTION_DATA) {
   const comparable = archive.filter(p => p.type === "party_support" && p.useInModel !== false);
   comparable.forEach(p => {
     const exists = window.ELECTION_DATA.councilPolls.some(x => x.fieldEnd === p.fieldEnd && x.pollster === p.pollster);
-    if (!exists) window.ELECTION_DATA.councilPolls.push({ ...p });
+    if (!exists) window.ELECTION_DATA.councilPolls.push({ ...p, neutral: p.neutral ?? p.undecided ?? null });
   });
 
   // Comparable historical rows now live in the canonical councilPolls array used by app.js.
   // Keep only non-comparable context rows here so the public archive does not display duplicates.
   window.SITE_RESEARCH.historicalPartyPolls = archive.filter(p => p.type !== "party_support" || p.useInModel === false);
 }
+
+(() => {
+  const params = new URLSearchParams(location.search);
+  let stored = null;
+  try { stored = localStorage.getItem("tcsm-lang"); } catch (_) {}
+  const english = params.get("lang") === "en" || (!params.has("lang") && stored === "en");
+  if (!english) return;
+  const script = document.createElement("script");
+  script.src = "./site-i18n.js";
+  script.async = false;
+  document.head.appendChild(script);
+})();
