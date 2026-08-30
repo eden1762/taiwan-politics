@@ -64,7 +64,9 @@
     '組織／活動／來源':'Organizations / events / sources',
     '低':'Low','偏低':'Low','中':'Medium','中高':'Medium-high',
     '背景':'Context','納入':'Included','查看來源':'View source',
-    '政黨總票＋席次proxy':'Party vote + seat proxy','席次為低信心估計':'Low-confidence seat estimate'
+    '政黨總票＋席次proxy':'Party vote + seat proxy','席次為低信心估計':'Low-confidence seat estimate',
+    '透明、可重算':'Transparent and reproducible',
+    '科學方向 + 公開工程參數':'Scientific direction + disclosed engineering parameters'
   }));
 
   const phrases = [
@@ -89,9 +91,9 @@
     ['住宅電話訪問','Residential telephone interview'],
     ['網路人口調查','Online population survey'],
     ['手機簡訊封閉式網路問卷','Closed online questionnaire recruited by mobile SMS'],
+    ['全國政黨支持度','National party support'],
     ['政黨支持度','Party support'],
     ['政黨傾向','Party preference'],
-    ['全國政黨支持度','National party support'],
     ['政黨好感度','Party favorability'],
     ['政治人物好感度','Political figure favorability'],
     ['主要藍白整合對決題','Main KMT-TPP coordination matchup'],
@@ -102,9 +104,6 @@
     ['結構估計','Structural estimate'],
     ['低信心','Low confidence'],
     ['模型領先','Model leader'],
-    ['領先','lead'],
-    ['票',' votes'],
-    ['信心','confidence'],
     ['民調混合比重','Poll blend weight'],
     ['直接情境民調比重','Direct-scenario poll weight'],
     ['三黨結構','Three-party structure'],
@@ -114,8 +113,8 @@
     ['其他／無黨','Other / independent'],
     ['目前預測單位','Current forecast unit'],
     ['模型目標','Model objective'],
-    ['透明、可重算','Transparent and reproducible'],
-    ['科學方向 + 公開工程參數','Scientific direction + disclosed engineering parameters']
+    ['資料更新至','Data updated through'],
+    ['正式名單以中選會公告為準','Official candidate lists are subject to Central Election Commission announcements']
   ];
 
   const people = {
@@ -134,6 +133,8 @@
     let out = raw;
     phrases.forEach(([zh,en]) => { out = out.split(zh).join(en); });
     Object.entries(people).forEach(([zh,en]) => { out = out.split(zh).join(en); });
+    // Translate displayed numeric vote counts without touching words such as 投票 or proper source names.
+    out = out.replace(/([0-9][0-9,]*)票/g, '$1 votes');
     node.nodeValue = out;
   }
 
@@ -142,15 +143,12 @@
     const nodes = [];
     while (walker.nextNode()) nodes.push(walker.currentNode);
     nodes.forEach(translateTextNode);
-    document.querySelectorAll('input[placeholder]').forEach(el => {
-      if (exact.has(el.placeholder)) el.placeholder = exact.get(el.placeholder);
-    });
+    const placeholders = document.querySelectorAll('input[placeholder]');
+    placeholders.forEach(el => { if (exact.has(el.placeholder)) el.placeholder = exact.get(el.placeholder); });
   }
 
   translateAll();
 
-  // app.js and Leaflet may add a small amount of text asynchronously after this file is parsed.
-  // Observe only additions, translate once, and avoid maintaining a second page implementation.
   const observer = new MutationObserver(mutations => {
     mutations.forEach(m => m.addedNodes.forEach(n => {
       if (n.nodeType === Node.TEXT_NODE) translateTextNode(n);
