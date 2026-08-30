@@ -133,4 +133,15 @@ window.SITE_RESEARCH = {
 if (window.ELECTION_DATA) {
   window.ELECTION_DATA.asOf = window.SITE_RESEARCH.asOf;
   window.ELECTION_DATA.candidateNotice = "資料更新至 2026-08-30。2026 地方選舉候選人仍可能調整；本站以已提名、已宣布參選或主要公開對決組合建模，正式名單以中選會公告為準。";
+
+  const archive = window.SITE_RESEARCH.historicalPartyPolls;
+  const comparable = archive.filter(p => p.type === "party_support" && p.useInModel !== false);
+  comparable.forEach(p => {
+    const exists = window.ELECTION_DATA.councilPolls.some(x => x.fieldEnd === p.fieldEnd && x.pollster === p.pollster);
+    if (!exists) window.ELECTION_DATA.councilPolls.push({ ...p });
+  });
+
+  // Comparable historical rows now live in the canonical councilPolls array used by app.js.
+  // Keep only non-comparable context rows here so the public archive does not display duplicates.
+  window.SITE_RESEARCH.historicalPartyPolls = archive.filter(p => p.type !== "party_support" || p.useInModel === false);
 }
