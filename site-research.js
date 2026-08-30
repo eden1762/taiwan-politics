@@ -13,6 +13,20 @@ window.SITE_RESEARCH = {
   },
   historicalPartyPolls: [
     {
+      fieldEnd: "2024-04-17",
+      pollster: "台灣民意基金會／山水民意研究",
+      sponsor: "台灣民意基金會",
+      n: 1084,
+      moe: 2.98,
+      type: "party_support",
+      quality: 1.0,
+      values: { DPP: 32.9, KMT: 19.2, TPP: 18.6 },
+      undecided: 25.6,
+      useInModel: true,
+      url: "https://tw.news.yahoo.com/%E6%9C%80%E6%96%B0%E6%94%BF%E9%BB%A8%E6%94%AF%E6%8C%81%E5%BA%A6%E6%B0%91%E9%80%B2%E9%BB%A832-9-%E7%AC%AC-%E8%97%8D%E7%99%BD%E5%B7%AE%E8%B7%9D%E6%9B%9D%E5%85%89-032815696.html",
+      note: "4/15–4/17市話＋手機雙底冊；2024總統大選後早期同口徑政黨支持訊號。"
+    },
+    {
       fieldEnd: "2024-04-24",
       pollster: "美麗島電子報",
       sponsor: "美麗島電子報",
@@ -23,6 +37,20 @@ window.SITE_RESEARCH = {
       useInModel: false,
       url: "https://my-formosa.com.tw/DOC_205577.htm",
       note: "政黨好感度，不是政黨支持度／議員投票意向；保留作2024年初政治環境背景，不納入席次模型。"
+    },
+    {
+      fieldEnd: "2024-08-14",
+      pollster: "台灣民意基金會／山水民意研究",
+      sponsor: "台灣民意基金會",
+      n: 1075,
+      moe: 2.99,
+      type: "party_support",
+      quality: 1.0,
+      values: { DPP: 34.2, KMT: 23.2, TPP: 13.8 },
+      undecided: 26.5,
+      useInModel: true,
+      url: "https://www.tpof.org/wp-content/uploads/2024/08/20240819-%E3%80%8C%E5%8F%B0%E7%81%A3%E4%BA%BA%E7%9A%84%E6%94%BF%E9%BB%A8%E6%94%AF%E6%8C%81%E5%82%BE%E5%90%91%EF%BC%9A%E6%B0%91%E7%9C%BE%E9%BB%A8%E9%82%84%E6%9C%89%E6%98%8E%E5%A4%A9%E5%97%8E%EF%BC%9F%E3%80%8DTPOF-%E5%85%AB%E6%9C%88%E5%8D%B3%E6%99%82%E6%B0%91%E8%AA%BF%E4%B9%8B2.pdf",
+      note: "8/12–8/14市話＋手機雙底冊；同口徑政黨支持訊號。"
     },
     {
       fieldEnd: "2024-12-26",
@@ -50,6 +78,34 @@ window.SITE_RESEARCH = {
       datePrecision: "month",
       url: "https://www.my-formosa.com.tw/DOC_216790.htm",
       note: "2025年5月政黨好感度；僅作長期政治環境背景。日期以月份呈現，不拿來做精細時間權重。"
+    },
+    {
+      fieldEnd: "2025-08-06",
+      pollster: "台灣民意基金會／山水民意研究",
+      sponsor: "台灣民意基金會",
+      n: 1079,
+      moe: 2.98,
+      type: "party_support",
+      quality: 1.0,
+      values: { DPP: 29.4, KMT: 20.1, TPP: 15.2 },
+      undecided: 29.8,
+      useInModel: true,
+      url: "https://www.tpof.org/wp-content/uploads/2025/08/%E5%8F%B0%E7%81%A3%E6%B0%91%E6%84%8F%E5%9F%BA%E9%87%91%E6%9C%838%E6%9C%88%E6%B0%91%E8%AA%BF%E5%A0%B1%E5%91%8A.pdf",
+      note: "8/4–8/6市話＋手機雙底冊；同口徑政黨支持訊號。"
+    },
+    {
+      fieldEnd: "2025-12-17",
+      pollster: "台灣民意基金會／山水民意研究",
+      sponsor: "台灣民意基金會",
+      n: 1077,
+      moe: 2.99,
+      type: "party_support",
+      quality: 1.0,
+      values: { DPP: 38.4, KMT: 20.6, TPP: 16.7 },
+      undecided: 22.2,
+      useInModel: true,
+      url: "https://www.tpof.org/wp-content/uploads/2025/12/%E5%8F%B0%E7%81%A3%E6%B0%91%E6%84%8F%E5%9F%BA%E9%87%91%E6%9C%8312%E6%9C%88%E6%B0%91%E8%AA%BF%E5%A0%B1%E5%91%8A.pdf",
+      note: "12/15–12/17市話＋手機雙底冊；同口徑政黨支持訊號。"
     },
     {
       fieldEnd: "2025-12-24",
