@@ -208,7 +208,7 @@
     const hero=$('.hero')||$('.home-hero');if(hero){const note=document.createElement('p');note.className='en-note';note.textContent='English uses the same HTML, JavaScript and data sources as Chinese. Proper names and primary-source wording may remain in Chinese where no reliable official English form is available.';hero.appendChild(note);}
   }
 
-  addQuickActions();
+  // Provide a shared navigation link without duplicating all public HTML page templates.\n  const primaryNav = document.getElementById('mainNav');\n  if (primaryNav && !primaryNav.querySelector('a[data-page="lab"]')) {\n    const a = document.createElement('a'); a.dataset.page = 'lab'; a.href = './data-lab.html';\n    a.textContent = isEn ? 'Polling & Data' : '民調數據分析';\n    primaryNav.appendChild(a);\n  }\n  addQuickActions();
   if(page==='mayor'){addMapLegend('mayorLegend');addMayorTrend();}
   if(page==='council'){addMapLegend('councilLegend');addCouncilTrend();rebuildArchive();}
   if(page==='president'){addMapLegend('presidentLegend');addPresidentTrend();}

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>民調與公開數據觀測｜台灣公民與主權地圖</title>
+<meta name="description" content="2026地方選舉公開民調調查筆數、樣本覆蓋、不同機構原始支持度散點、題型分類及歷年官方選票基準；不把聲量視為投票意向。">
+<link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./site-enhancements.css"><link rel="stylesheet" href="./poll-data-lab.css">
+</head>
+<body data-page="lab">
+<header class="topbar"><a class="brand" href="./index.html"><span class="brand-mark">台</span><span><strong>台灣公民與主權地圖</strong><small>Taiwan Civic & Sovereignty Map</small></span></a><button id="menuButton" class="menu-button" type="button" aria-label="開啟導覽">☰</button><nav id="mainNav" class="main-nav">
+<a href="./mayor-2026.html">2026縣市長</a><a href="./council-2026.html">2026縣市議員</a><a href="./president-2028.html">2028總統</a><a href="./method.html">模型與公式</a><a data-page="lab" href="./data-lab.html">民調數據分析</a><a href="./sovereignty.html">主權活動</a>
+</nav></header>
+<main class="page-section">
+<div class="hero"><div><p class="eyebrow">POLLING & OPEN DATA LAB</p><h1>民調與公開數據分析</h1><p>依各調查截止日彙整具來源的候選人支持度民調，區分可納入模型與僅供背景的不同題型。資料量是統計覆蓋的指標，不是選民總數、選舉結果或網路人氣。</p></div><div class="status-card"><b>資料核對日</b><strong>2026/10/24</strong><span>原始問卷、抽樣方式和樣本詳見各來源</span></div></div>
+<section class="panel"><div class="panel-heading"><div><p class="eyebrow">DATA QUALITY</p><h2>資料完整度與調查涵蓋</h2></div></div><div class="lab-kpis" id="labSummary"></div><p class="lab-note">樣本數合計只是多次調查的名義樣本總和，同一人可能被不同調查重複訪問；不得當成去重後的獨立樣本，也不等於台灣全體選民。</p></section>
+<section class="panel"><div class="panel-heading"><div><p class="eyebrow">GEOGRAPHIC COVERAGE</p><h2>22 縣市民調覆蓋圖</h2></div></div><div id="countyCoverage" class="lab-bars"></div><p class="lab-note">每列為調查筆數，並分別列出目前符合本站建模規則的筆數；沒有民調不代表某候選人沒有支持。</p></section>
+<section class="panel"><div class="panel-heading"><div><p class="eyebrow">POLLING BY MONTH</p><h2>每月調查筆數（2026）</h2></div></div><div id="monthlyChart" class="lab-bars"></div><p class="lab-note">月份依調查結束日，非發布日期；相同機構、近似題目仍各保留為原始紀錄。</p></section>
+<section class="panel"><div class="panel-heading"><div><p class="eyebrow">SOURCE EXPLORER</p><h2>原始民調比較與時間散點</h2></div><span id="dataCount"></span></div>
+<div class="lab-filters"><label>地區 <select id="countySelect"></select></label><label class="lab-check"><input id="includeContext" type="checkbox" checked> 顯示僅供背景、不納入模型的調查</label></div>
+<div id="scatterPanel" class="lab-scatter"></div><div class="table-wrap"><table id="pollTable" class="lab-table"></table></div>
+<p class="lab-note">注意：同一縣市內不同民調機構、時間、受訪人口、委託人與題目可能不同；散點是歷次公布值，不表示同一批人的追蹤變化。網路非機率樣本與電話機率樣本分開標示。未決定比例不會推定分配給候選人。</p>
+</section>
+<section class="panel"><div class="panel-heading"><div><p class="eyebrow">PUBLIC OPINION CONTEXT</p><h2>不同題型的民意背景</h2></div></div><div id="opinionContext" class="lab-context-grid"></div><p class="lab-note">不同母體與不同題型不能合併比較：喜好度、政黨傾向、候選人投票意向與當選看好度是四種不同量測，不可混成一個民調百分比。</p></section>
+<section class="panel"><div class="panel-heading"><div><p class="eyebrow">HISTORICAL VOTE DATA</p><h2>22 縣市大型歷史開票數據基準</h2></div></div><div class="lab-kpis" id="baselineSummary"></div><p class="lab-note">此區直接彙整本站已收錄的各縣市 2022 地方選舉和 2024 總統選舉有效票基準。這些是不同選舉的歷史票量，不是2026投票率或2028票數預測；原始結果應與<a href="https://db.cec.gov.tw/" target="_blank" rel="noopener noreferrer">中選會選舉資料庫</a>核對。</p></section>
+</main><footer><strong>民調與公開數據觀測</strong><span>只彙整有據可查的公開資料，不憑空產生網路聲量／搜尋量或勝選機率。</span></footer>
+<script src="./election-data.js"></script><script src="./site-research.js"></script><script src="./bigdata-context.js"></script><script src="./poll-data-lab.js"></script>
+</body></html>
