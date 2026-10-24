@@ -129,6 +129,6 @@
   renderContext();
   selectedCounty.addEventListener("change",update);
   check.addEventListener("change",update);
-  el("menuButton")?.addEventListener("click",()=>el("mainNav")?.classList.toggle("is-open"));
+  el("menuButton")?.addEventListener("click",()=>el("mainNav")?.classList.toggle("open"));
   update();
 })();
