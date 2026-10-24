@@ -1,7 +1,7 @@
 window.ELECTION_DATA = {
-  asOf: "2026-08-28",
+  asOf: "2026-10-24",
   localElectionDate: "2026-11-28",
-  candidateNotice: "資料更新至 2026-08-28。2026 地方選舉候選人仍可能調整；本站以已提名、已宣布參選或主要公開對決組合建模，正式名單以中選會公告為準。",
+  candidateNotice: "截至 2026-10-24 已補入近期公開候選人支持度民調；不同調查的樣本、問法、委託來源與時間均可能不同。模型為現有程式之條件式運算，非選舉結果。正式候選人資格與號次請以中選會公告為準。",
   geojsonUrl: "https://raw.githubusercontent.com/ronnywang/twgeojson/master/twcounty2010.2.json",
   parties: {
     DPP:{label:"民進黨",short:"民進黨",color:"#1b8f55"}, KMT:{label:"國民黨",short:"國民黨",color:"#2f6fce"}, TPP:{label:"民眾黨",short:"民眾黨",color:"#36aeb4"}, IND:{label:"無黨／合作",short:"無黨",color:"#c58b2a"}, JRP:{label:"司法改革黨",short:"司改黨",color:"#7a5fc0"}, TWP:{label:"台灣工黨",short:"台灣工黨",color:"#b45f82"}, OTHER:{label:"其他／未定",short:"其他",color:"#77828d"}
@@ -60,6 +60,15 @@ window.ELECTION_DATA = {
     "連江縣":{candidates:[{id:"wangchung",name:"王忠銘",party:"KMT",manualPrior:62.67},{id:"otherlc",name:"其他／未定",party:"OTHER",manualPrior:37.33}],note:"正式登記前主要競爭人選未完整，僅顯示結構估計。"}
   },
   mayorPolls:[
+    {"county":"臺北市","pollster":"TVBS民調中心","sponsor":"TVBS","fieldStart":"2026-10-03","fieldEnd":"2026-10-07","publishedAt":"2026-10-08","n":1120,"moe":2.9,"quality":1,"values":{"chiang":49,"puma":41},"undecided":11,"other":null,"url":"https://www.tvbs.com.tw/poll-center","note":"10/3、10/5–10/7；市話抽樣；20歲以上台北市民；投票意向為有投票意願者1054人，原公布數值有四捨五入，勿與全體樣本混為同一母體。"},
+    {"county":"臺北市","pollster":"畢肯市場研究公司","sponsor":"台北市信民兩岸研究協會","fieldStart":"2026-10-14","fieldEnd":"2026-10-16","publishedAt":"2026-10-20","n":1075,"moe":3,"quality":0.95,"values":{"puma":50.3,"chiang":33.3},"undecided":12.2,"other":4.2,"url":"https://tw.news.yahoo.com/%E4%BF%A1%E6%B0%91%E5%8D%94%E6%9C%83-%E6%88%B4%E7%AB%8B%E5%AE%89-%E5%8F%B0%E5%8C%97%E5%B8%82%E6%9C%80%E6%96%B0%E6%B0%91%E8%AA%BF%E6%96%B0%E8%81%9E%E7%A8%BF10%E6%9C%8820%E6%97%A5%E8%88%89%E7%99%BC%E8%A1%A8%E6%9C%83-194900434.html","note":"主持／分析：戴立安；市話＋手機訪問；設籍台北市20歲以上；其他4.2%含其他候選人與不投票選項，主要兩人結果同題但有其他選項。"},
+    {"county":"臺北市","pollster":"山水民意研究股份有限公司","sponsor":"震傳媒","fieldStart":"2026-10-18","fieldEnd":"2026-10-19","publishedAt":"2026-10-22","n":1074,"moe":2.99,"quality":0.95,"values":{"puma":42.8,"chiang":39},"undecided":18.1,"other":0.1,"url":"https://www.zmedia.com.tw/Document/PoolDetail/44789","note":"住宅電話CATI、尾2碼隨機；設籍台北市20歲以上；原題另有郭璽0.1%；95%信心水準；主持資訊請參考原始公告。"},
+    {"county":"新北市","pollster":"TVBS民調中心","sponsor":"國民黨新北市議會黨團","fieldStart":"2026-09-29","fieldEnd":"2026-10-03","publishedAt":"2026-10-07","n":1210,"moe":2.8,"quality":0.85,"values":{"lee":42.6,"su":35.9},"undecided":19.9,"other":1.6,"url":"https://news.tvbs.com.tw/politics/4032874","note":"委託TVBS民調中心；20歲以上設籍新北市；平日與假日訪問；原公布兩主要候選人及未決定比例。"},
+    {"county":"桃園市","pollster":"趨勢民意調查股份有限公司","sponsor":"財團法人凱達格蘭基金會／新台灣國策智庫","fieldStart":"2026-09-15","fieldEnd":"2026-09-17","publishedAt":"2026-09-22","n":1082,"moe":2.98,"quality":0.9,"values":{"chang":47,"huang":25.9},"undecided":27.1,"url":"https://poll-tw.com/taoyuan","note":"市話隨機抽樣；設籍桃園市20歲以上；95%信心水準；原始新聞報導與委託揭露見來源。"},
+    {"county":"臺中市","pollster":"循證民調有限公司","sponsor":"台中市信賴台灣之友會","fieldStart":"2026-10-05","fieldEnd":"2026-10-06","publishedAt":"2026-10-12","n":1071,"moe":2.99,"quality":0.9,"values":{"johnny":34.3,"ho":32.4},"undecided":32.2,"other":1.1,"url":"https://poll-tw.com/taichung","note":"市話＋手機隨機抽樣；設籍台中市20歲以上；原題另有洪麗華1.1%，與兩主要候選人同題；投票意向作答對象未載明。"},
+    {"county":"臺南市","pollster":"趨勢民意調查股份有限公司","sponsor":"凱達格蘭基金會／新台灣國策智庫","fieldStart":"2026-10-13","fieldEnd":"2026-10-15","publishedAt":"2026-10-21","n":1071,"moe":2.98,"quality":0.9,"values":{"chen":59.4,"lung":22.6},"undecided":17,"other":1,"url":"https://poll-tw.com/tainan","note":"市話分層隨機抽樣；戶籍台南市20歲以上；原題另有葉人文0.9%、蕭燐洪0.1%。"},
+    {"county":"基隆市","pollster":"趨勢民意調查股份有限公司","sponsor":"國民黨基隆市黨部","fieldStart":"2026-10-07","fieldEnd":"2026-10-09","publishedAt":"2026-10-15","n":1070,"moe":3,"quality":0.82,"values":{"hsieh":42.9,"tong":38.3},"undecided":null,"url":"https://poll-tw.com/keelung","note":"市話分層隨機抽樣；設籍基隆市20歲以上；原資料只公布兩人合計81.2%，其餘選項不得推定為未表態。"},
+    {"county":"基隆市","pollster":"大地民意研究股份有限公司","sponsor":"鏡新聞","fieldStart":"2026-10-18","fieldEnd":"2026-10-21","publishedAt":"2026-10-23","n":1075,"moe":2.99,"quality":0.95,"values":{"tong":37,"hsieh":36.3},"undecided":25.9,"other":0.8,"url":"https://www.mirrormedia.mg/story/20261023edi015","note":"市話訪問；戶籍基隆市20歲以上；原題另有魏造文0.8%；95%信心水準；不可將0.7百分點差距誤當選舉結果。"},
     {county:"臺北市",pollster:"TVBS民調中心",sponsor:"TVBS",fieldEnd:"2026-05-26",n:901,moe:3.3,quality:1.00,values:{chiang:58,puma:30},undecided:13,url:"https://news.tvbs.com.tw/politics/3214867",note:"有投票意願者"},
     {county:"臺北市",pollster:"TPOC台灣議題研究中心",sponsor:"TPOC",fieldEnd:"2026-08-07",n:1099,moe:2.96,quality:0.95,values:{chiang:48.4,puma:33.0},undecided:18.7,url:"https://news.tvbs.com.tw/politics/4007563",note:"8/5–8/7市話分層比例隨機抽樣"},
     {county:"新北市",pollster:"TVBS民調中心",sponsor:"國民黨新北市議會黨團",fieldEnd:"2026-07-23",n:1303,moe:2.7,quality:0.85,values:{lee:43.7,su:36.8},undecided:17.4,other:2.1,url:"https://news.tvbs.com.tw/politics/3270596",note:"委託案，CATI/RDD；來源品質係數下調"},
