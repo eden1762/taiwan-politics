@@ -4,6 +4,24 @@ window.POLL_CONTEXT_DATA = {
   asOf: "2026-10-27",
   indicators: [
     {
+      id:"taipei-person-favorability-20261022",
+      label:"台北市受訪者對政治人物好感度（10/27發布）",period:"2026-10-20～2026-10-22",fieldEnd:"2026-10-22",
+      scope:"全國調查中的台北市子樣本（樣本數未公開）",questionType:"人物好感度（非市長投票意向）",
+      sampling:"市話＋手機 CATI；城市子樣本數未公布",pollster:"台灣民心調查／畢肯市場研究",
+      values:{"蔣萬安":39.7,"沈伯洋":56.1},
+      url:"https://www.businesstoday.com.tw/article/category/183027/post/202610270025/",
+      note:"來源為全國調查的台北交叉分組；不借用全國1075樣本或±3%誤差，人物好感度不等於候選人得票支持度，且不納模型。"
+    },
+    {
+      id:"national-election-perception-20261022",
+      label:"受訪者對22縣市選舉席次的看法（10/27發布）",period:"2026-10-20～2026-10-22",fieldEnd:"2026-10-22",
+      scope:"全國22縣市設籍20歲以上民眾",questionType:"選舉結果看法（非個別候選人投票意向）",
+      sampling:"市話＋手機 CATI",pollster:"台灣民心調查／畢肯市場研究",n:1075,moe:3,
+      values:{"認為民進黨至少取得11席":38.1,"認為國民黨至少取得11席":28.7},
+      url:"https://www.businesstoday.com.tw/article/category/183027/post/202610270025/",
+      note:"僅記錄受訪者對未來席次的想法，數值是回答比例，並非本站的勝選預測或機率，不納模型。"
+    },
+    {
       id:"national-party-favorability-20261022",
       label:"全國政黨好感度（2026年10月）", period:"2026-10-20～2026-10-22", fieldEnd:"2026-10-22",
       scope:"全國22縣市設籍20歲以上民眾", questionType:"政黨好感度（非投票意向）",

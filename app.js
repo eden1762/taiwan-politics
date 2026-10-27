@@ -16,18 +16,36 @@
   const sortedShares = x => Object.entries(x).sort((a,b)=>b[1]-a[1]);
   const sumKeys = (obj,keys=[]) => keys.reduce((s,k)=>s+Number(obj?.[k]||0),0);
 
+  // Keep institutional aliases under the same information cap.
+  const pollsterKey = name => {
+    const raw=String(name||"未知").trim().toLowerCase().replaceAll(" ","");
+    if(raw.startsWith("tvbs"))return "tvbs";
+    if(raw.startsWith("山水"))return "山水";
+    if(raw.startsWith("畢肯"))return "畢肯";
+    if(raw.startsWith("年代民調"))return "年代";
+    return raw;
+  };
   function pollWeight(poll, halfLife) {
-    const age = daysBetween(poll.fieldEnd,E.asOf);
-    const samplingSigma = Number(poll.moe)>0 ? Number(poll.moe)/1.96 : 50/Math.sqrt(Number(poll.n));
-    const variance = samplingSigma ** 2 + E.model.pollErrorFloor ** 2;
-    const recency = Math.pow(2,-age/halfLife);
-    return {weight:(poll.quality ?? 0.9)*recency/variance,age,samplingSigma,variance,recency};
+    const age=daysBetween(poll.fieldEnd,E.asOf);
+    const n=Number(poll.voteN ?? poll.n);
+    const sampleSigma=n>=200?50/Math.sqrt(n):0;
+    const publishedSigma=Number(poll.moe)>0?Number(poll.moe)/1.96:0;
+    const samplingSigma=Math.max(sampleSigma,publishedSigma);
+    const variance=samplingSigma**2+E.model.pollErrorFloor**2;
+    const recency=Math.pow(2,-age/halfLife);
+    return {weight:(poll.quality??0.9)*recency/variance,age,samplingSigma,variance,recency};
   }
   function poolPolls(polls,ids,halfLife) {
-    const rows=polls.filter(p=>quality.modelEligible(p,ids)).map(p=>({...pollWeight(p,halfLife),poll:p}));
+    const seen=new Set();
+    const rows=polls.filter(p=>quality.modelEligible(p,ids)).filter(p=>{
+      const fingerprint=[p.county||"全國",pollsterKey(p.pollster),p.fieldStart||"",p.fieldEnd,
+        ...ids.map(id=>String(p.values[id]))].join("|");
+      if(seen.has(fingerprint))return false;
+      seen.add(fingerprint);return true;
+    }).map(p=>({...pollWeight(p,halfLife),poll:p}));
     const group=new Map();
     rows.forEach(r=>{
-      const key=String(r.poll.pollster||"未知").trim().toLowerCase();
+      const key=pollsterKey(r.poll.pollster);
       const g=group.get(key)||{total:0,max:0};
       g.total+=r.weight;g.max=Math.max(g.max,r.weight);group.set(key,g);
     });
@@ -35,7 +53,7 @@
     const totals=Object.fromEntries(ids.map(id=>[id,0]));
     let info=0;
     const details=rows.map(r=>{
-      const g=group.get(String(r.poll.pollster||"未知").trim().toLowerCase());
+      const g=group.get(pollsterKey(r.poll.pollster));
       const factor=Math.min(1,cap*g.max/g.total);
       const weight=r.weight*factor;
       const normalized=normalizeObject(Object.fromEntries(ids.map(id=>[id,Number(r.poll.values[id])])));
@@ -53,13 +71,20 @@
   }
   const countyIndex=Object.fromEntries(E.counties.map(c=>[c.name,c]));
   function mayorPrior(county,race){const c=countyIndex[county],raw={};race.candidates.forEach(x=>{if(x.manualPrior!=null){raw[x.id]=Number(x.manualPrior);return}const local=x.manualLocal2022??sumKeys(c.m2022,x.baseKeys),national=sumKeys(c.p2024,x.baseKeys);raw[x.id]=(local*E.model.localPrior2022Weight+national*E.model.localPrior2024Weight)*(x.priorScale??1)});return normalizeObject(raw)}
-  function confidence(polls,margin,posteriorSd,kind="local"){if(!polls.length)return{label:"低",cls:"low",reason:"沒有現行可比民調，主要依結構先驗"};const recent=polls.filter(p=>daysBetween(p.fieldEnd,E.asOf)<=120).length,rough95=1.96*Math.sqrt(2)*posteriorSd;if(kind==="president")return{label:"低",cls:"low",reason:"距投票日遠、候選人為假設情境"};if(recent>=2&&margin>rough95)return{label:"中高",cls:"high",reason:`${recent}份近期可比民調；模型領先差大於近似誤差門檻`};if(recent>=1)return{label:"中",cls:"mid",reason:`${recent}份近期可比民調；仍有候選人與非抽樣誤差風險`};return{label:"偏低",cls:"low",reason:"僅較舊可比民調"}}
+  function confidence(polls,margin,posteriorSd,kind="local"){
+    if(!polls.length)return {label:"低",cls:"low",reason:"無符合規則的可比調查，主要依歷史先驗"};
+    if(kind==="president")return {label:"低",cls:"low",reason:"候選人仍是假設情境，單一問卷不足以驗證"};
+    const institutions=new Set(polls.filter(p=>daysBetween(p.fieldEnd,E.asOf)<=90).map(p=>pollsterKey(p.pollster))).size;
+    if(institutions>=3)return {label:"中",cls:"mid",reason:institutions+"家獨立機構有近期可比問卷；仍未完成歷屆回測"};
+    if(institutions>=2)return {label:"偏低",cls:"low",reason:institutions+"家獨立機構有近期可比問卷；不可把模型幅度當成信賴區間"};
+    return {label:"低",cls:"low",reason:"近期獨立調查機構不足，模型高度依賴結構先驗"};
+  }
   function computeMayor(){const results={};Object.entries(E.mayorRaces).forEach(([county,race])=>{const ids=race.candidates.map(x=>x.id),allPolls=E.mayorPolls.filter(p=>p.county===county),polls=allPolls.filter(p=>quality.modelEligible(p,ids)),prior=mayorPrior(county,race),pool=poolPolls(polls,ids,E.model.localHalfLifeDays),mixed=precisionBlend(pool,prior,E.model.localPriorPrecision,E.model.localPollCap),sorted=sortedShares(mixed.shares),leader=race.candidates.find(x=>x.id===sorted[0][0]),runner=race.candidates.find(x=>x.id===sorted[1]?.[0]),margin=sorted[0][1]-(sorted[1]?.[1]||0);results[county]={county,race,allPolls,polls,prior,pool,forecast:mixed.shares,lambda:mixed.lambda,posteriorSd:mixed.posteriorSd,leader,runner,margin,volume:countyIndex[county].mayorVotes2022,confidence:confidence(polls,margin,mixed.posteriorSd)}});return results}
   function computeCouncil(){const ids=["DPP","KMT","TPP"],polls=E.councilPolls.filter(p=>quality.modelEligible(p,ids)),pool=poolPolls(polls,ids,E.model.councilHalfLifeDays),prior={DPP:E.national2024.DPP,KMT:E.national2024.KMT,TPP:E.national2024.TPP},mixed=precisionBlend(pool,prior,E.model.councilPriorPrecision,E.model.councilPollCap),results={};E.counties.forEach(c=>{const swing={};ids.forEach(k=>swing[k]=c.p2024[k]*(mixed.shares[k]/E.national2024[k]));const norm=normalizeObject(swing),six=["臺北市","新北市","桃園市","臺中市","臺南市","高雄市"].includes(c.name),other=(six?E.model.councilOtherShareSixCities:E.model.councilOtherShareOtherCounties)*100,shares={DPP:norm.DPP*(100-other)/100,KMT:norm.KMT*(100-other)/100,TPP:norm.TPP*(100-other)/100,OTHER:other},sorted=sortedShares(shares);results[c.name]={county:c.name,shares,leader:sorted[0][0],margin:sorted[0][1]-sorted[1][1],volume:c.councilVotes2022}});return{results,national:mixed.shares,lambda:mixed.lambda,pool,posteriorSd:mixed.posteriorSd}}
   function computePresident(){const ids=E.president.candidates.map(x=>x.id),polls=E.president.polls.filter(p=>quality.modelEligible(p,ids)),pool=poolPolls(polls,ids,E.model.presidentialHalfLifeDays),pMap={lai2028:"DPP",lu2028:"KMT",ko2028:"TPP"},pollParty=pool?Object.fromEntries(ids.map(id=>[pMap[id],pool.shares[id]])):null,prior={DPP:E.national2024.DPP,KMT:E.national2024.KMT,TPP:E.national2024.TPP},partyPool=pool?{...pool,shares:pollParty}:null,mixed=precisionBlend(partyPool,prior,E.model.presidentialPriorPrecision,E.model.presidentialPollCap),results={};E.counties.forEach(c=>{const raw={};["DPP","KMT","TPP"].forEach(k=>raw[k]=c.p2024[k]*(mixed.shares[k]/E.national2024[k]));const p=normalizeObject(raw),shares={lai2028:p.DPP,lu2028:p.KMT,ko2028:p.TPP},sorted=sortedShares(shares),leader=E.president.candidates.find(x=>x.id===sorted[0][0]);results[c.name]={county:c.name,shares,leader,margin:sorted[0][1]-sorted[1][1],volume:c.presidentVotes2024,confidence:confidence(polls,sorted[0][1]-sorted[1][1],mixed.posteriorSd,"president")}});return{results,national:mixed.shares,lambda:mixed.lambda,pool,pollParty,posteriorSd:mixed.posteriorSd}}
   const mayor=computeMayor(),council=computeCouncil(),president=computePresident();
   function metric(label,value,sub=""){return`<div class="metric"><b>${esc(value)}</b><span>${esc(label)}${sub?`｜${esc(sub)}`:""}</span></div>`} function legendHtml(keys){return keys.map(k=>`<span class="legend-item"><i class="swatch" style="background:${party(k).color}"></i>${esc(party(k).label)}</span>`).join("")}
-  function currentHistory(type){if(type==="mayor"){const counts={};Object.values(mayor).forEach(r=>counts[r.leader.party]=(counts[r.leader.party]||0)+1);return{date:E.asOf,label:`v4｜民進黨 ${counts.DPP||0}、國民黨 ${counts.KMT||0}、其他 ${Object.values(mayor).length-(counts.DPP||0)-(counts.KMT||0)}`,note:"逆總變異民調權重＋2022地方選舉／2024總統結構先驗；加入8/26新北最新民調。"}}if(type==="council")return{date:E.asOf,label:`v4｜三黨結構：民進黨 ${pct(council.national.DPP)}、國民黨 ${pct(council.national.KMT)}、民眾黨 ${pct(council.national.TPP)}`,note:"新增8月台灣民心調查；政黨傾向只作地方擺動訊號，非議員投票題。"};return{date:E.asOf,label:`v4｜賴／盧／柯情境：民進黨 ${pct(president.national.DPP)}、國民黨 ${pct(president.national.KMT)}、民眾黨 ${pct(president.national.TPP)}`,note:"單一直接2028投票情境＋強結構先驗；候選人未正式提名。"}}
+  function currentHistory(type){if(type==="mayor"){const counts={};Object.values(mayor).forEach(r=>counts[r.leader.party]=(counts[r.leader.party]||0)+1);return{date:E.asOf,label:`v5｜民進黨 ${counts.DPP||0}、國民黨 ${counts.KMT||0}、其他 ${Object.values(mayor).length-(counts.DPP||0)-(counts.KMT||0)}`,note:"逆總變異民調權重＋2022地方選舉／2024總統結構先驗；加入8/26新北最新民調。"}}if(type==="council")return{date:E.asOf,label:`v5｜三黨結構：民進黨 ${pct(council.national.DPP)}、國民黨 ${pct(council.national.KMT)}、民眾黨 ${pct(council.national.TPP)}`,note:"新增8月台灣民心調查；政黨傾向只作地方擺動訊號，非議員投票題。"};return{date:E.asOf,label:`v5｜賴／盧／柯情境：民進黨 ${pct(president.national.DPP)}、國民黨 ${pct(president.national.KMT)}、民眾黨 ${pct(president.national.TPP)}`,note:"單一直接2028投票情境＋強結構先驗；候選人未正式提名。"}}
   function renderHistory(id,type){const node=byId(id);if(!node)return;const rows=[...(E.history[type]||[]),currentHistory(type)];node.innerHTML=`<div class="history-list">${rows.map((h,i)=>`<div class="history-item"><time>${esc(h.date)}</time><div><b>${esc(h.label)}</b><span>${esc(h.note||"")}</span></div><span>${i===rows.length-1?"目前版本":"歷史版本"}</span></div>`).join("")}</div><p class="caption">版本規則：每次更新民調、候選人或模型參數前，先把當前摘要寫入 history；因此可追溯本站歷次公開預測，不會被新數字覆蓋。</p>`}
   let geoPromise;const getGeo=()=>geoPromise||=(fetch(E.geojsonUrl).then(r=>{if(!r.ok)throw new Error("GeoJSON load failed");return r.json()}));const opacityByMargin=m=>m<3?.34:m<8?.48:m<15?.62:.76;
   function createForecastMap(el,resultMap,opts={}){const node=byId(el);if(!node||!window.L)return;const map=L.map(el,{zoomControl:true}).setView([23.72,120.95],7);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);getGeo().then(geo=>{let layer;layer=L.geoJSON(geo,{style:f=>{const n=normalizeName(f.properties.county),r=resultMap[n],key=r?(opts.leaderKey?opts.leaderKey(r):r.leader?.party||r.leader):"OTHER";return{color:"#d9e5eb",weight:.7,fillColor:r?party(key).color:"#59646d",fillOpacity:r?opacityByMargin(r.margin):.2}},onEachFeature:(f,l)=>{const n=normalizeName(f.properties.county),r=resultMap[n];if(!r)return;l.bindTooltip(n,{sticky:true,className:"map-tooltip"});l.bindPopup(opts.popup(r));l.on({mouseover:e=>e.target.setStyle({weight:2}),mouseout:e=>layer.resetStyle(e.target)})}}).addTo(map);map.fitBounds(layer.getBounds(),{padding:[8,8]})}).catch(()=>node.insertAdjacentHTML("afterend",'<p class="notice warning">行政界線暫時載入失敗；預測表仍可正常使用。</p>'))}

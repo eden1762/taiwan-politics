@@ -10,7 +10,7 @@ window.ELECTION_DATA = {
     cecDb:{title:"中央選舉委員會選舉資料庫",url:"https://db.cec.gov.tw/"}, cecSchedule:{title:"中選會｜115年地方公職人員選舉工作程序",url:"https://web.cec.gov.tw/central/article/61721"}, candidatesPts:{title:"公視｜2026九合一各政黨提名人選整理",url:"https://news.pts.org.tw/article/801606"}, candidatesObserve:{title:"2026 市長官方來源觀測站",url:"https://mayor2026.observe.tw/"}, geojson:{title:"ronnywang/twgeojson｜臺灣縣市界 GeoJSON",url:"https://github.com/ronnywang/twgeojson"},
     linzer:{title:"Linzer (2013), Dynamic Bayesian Forecasting of Presidential Elections in the States",url:"https://doi.org/10.1080/01621459.2012.737735",use:"結構模型與民調動態結合"}, jackman:{title:"Jackman (2005), Pooling the polls over an election campaign",url:"https://doi.org/10.1080/10361140500302472",use:"多份民調 pooling 與 house effects"}, shirani:{title:"Shirani-Mehr et al. (2018), Disentangling Bias and Variance in Election Polls",url:"https://doi.org/10.1080/01621459.2018.1448823",use:"抽樣誤差之外的共同偏誤與額外變異"}, jennings:{title:"Jennings & Wlezien (2018), Election polling errors across time and space",url:"https://doi.org/10.1038/s41562-018-0315-6",use:"跨國、跨時間的大樣本民調誤差研究"}, gelmanKing:{title:"Gelman & King (1993), Why Are American Presidential Election Campaign Polls So Variable When Votes Are So Predictable?",url:"https://doi.org/10.1017/S0007123400006682",use:"歷史結構資訊與競選期民調波動"}
   },
-  model:{pollErrorFloor:2.0,pollsterClusterCap:1.5,localHalfLifeDays:120,councilHalfLifeDays:150,presidentialHalfLifeDays:300,localPrior2022Weight:0.60,localPrior2024Weight:0.40,localPriorPrecision:0.18,localPollCap:0.82,councilPriorPrecision:0.34,councilPollCap:0.42,presidentialPriorPrecision:0.46,presidentialPollCap:0.48,councilOtherShareSixCities:0.18,councilOtherShareOtherCounties:0.35,note:"本站 v4 使用『逆總變異加權民調 + 時間衰減 + 結構先驗』。抽樣標準誤由公布的 95% 誤差反推，另加入 2.0 個百分點的系統誤差地板；這個 2.0、半衰期、先驗精度與混合上限是受實證研究啟發的透明工程校準，不宣稱是任何單篇論文的原始公式。2026 縣市長結構先驗以 2022 同類地方選舉 60% + 2024 總統縣市政黨結構 40% 組合。"},
+  model:{pollErrorFloor:2.0,pollsterClusterCap:1.5,localHalfLifeDays:120,councilHalfLifeDays:150,presidentialHalfLifeDays:300,localPrior2022Weight:0.60,localPrior2024Weight:0.40,localPriorPrecision:0.18,localPollCap:0.82,councilPriorPrecision:0.34,councilPollCap:0.42,presidentialPriorPrecision:0.46,presidentialPollCap:0.48,councilOtherShareSixCities:0.18,councilOtherShareOtherCounties:0.35,note:"本站 v5 使用『逆總變異加權民調 + 時間衰減 + 結構先驗』。抽樣標準誤由公布的 95% 誤差反推，另加入 2.0 個百分點的系統誤差地板；這個 2.0、半衰期、先驗精度與混合上限是受實證研究啟發的透明工程校準，不宣稱是任何單篇論文的原始公式。2026 縣市長結構先驗以 2022 同類地方選舉 60% + 2024 總統縣市政黨結構 40% 組合。"},
   counties:[
     {name:"臺北市",mayorVotes2022:1360951,councilVotes2022:1330504,presidentVotes2024:1542011,p2024:{DPP:38.13,KMT:38.08,TPP:23.79},m2022:{DPP:31.93,KMT:42.29,IND:25.14,OTHER:0.64}},
     {name:"新北市",mayorVotes2022:1846531,councilVotes2022:1812097,presidentVotes2024:2458480,p2024:{DPP:38.59,KMT:35.17,TPP:26.24},m2022:{DPP:37.58,KMT:62.42,TPP:0,OTHER:0}},
@@ -74,9 +74,9 @@ window.ELECTION_DATA = {
     {"county":"彰化縣","pollster":"聯合報系民意調查中心","sponsor":"聯合報","fieldStart":"2026-10-13","fieldEnd":"2026-10-15","publishedAt":"2026-10-19","n":1003,"moe":3.1,"values":{"chensu":32,"wei":16,"chiu":10},"undecided":42,"other":0.3,"sampling":"landline_random","useInModel":false,"url":"https://udn.com/news/story/124652/9822866","note":"市話隨機抽樣；另有陳重嘉約0.3%，現行模型未涵蓋第四人；原報導四捨五入可能不合計100%。"},
     {"county":"新竹縣","pollster":"年代民調中心","sponsor":"年代民調中心（經費來源請依報告確認）","fieldStart":"2026-09-16","fieldEnd":"2026-09-18","publishedAt":"2026-09-21","n":1069,"moe":3,"values":{"cheng":35.1,"hsu":28.7},"undecided":29.2,"other":7,"sampling":"landline_random","useInModel":false,"url":"https://poll-tw.com/hsinchu?poll=2026-09-18-era-hsinchu","note":"另有朱定瑀2.8%、不投票4.2%；現行模型只列兩主要候選人，保留原始數值但不混算。"},
     {"county":"花蓮縣","pollster":"風傳媒民調中心","sponsor":"風傳媒（經費來源依完整報告確認）","fieldStart":"2026-08-20","fieldEnd":"2026-08-22","publishedAt":"2026-08-28","n":1068,"moe":3,"values":{"yu":29.1,"changjun":19.4,"wei2":18.4},"undecided":29.6,"other":3.5,"sampling":"landline_random","useInModel":false,"url":"https://poll-tw.com/hualien","note":"含不投票3.5%；此題未納羅佩秦，和本站完整四人情境不一致；只作資料庫背景。"},
-    {"county":"臺北市","pollster":"TVBS民調中心","sponsor":"TVBS","fieldStart":"2026-10-03","fieldEnd":"2026-10-07","publishedAt":"2026-10-08","n":1120,"moe":2.9,"quality":1,"values":{"chiang":49,"puma":41},"undecided":11,"other":null,"url":"https://www.tvbs.com.tw/poll-center","note":"10/3、10/5–10/7；市話抽樣；20歲以上台北市民；投票意向為有投票意願者1054人，原公布數值有四捨五入，勿與全體樣本混為同一母體。"},
-    {"county":"臺北市","pollster":"畢肯市場研究公司","sponsor":"台北市信民兩岸研究協會","fieldStart":"2026-10-14","fieldEnd":"2026-10-16","publishedAt":"2026-10-20","n":1075,"moe":3,"quality":0.95,"values":{"puma":50.3,"chiang":33.3},"undecided":12.2,"other":4.2,"url":"https://tw.news.yahoo.com/%E4%BF%A1%E6%B0%91%E5%8D%94%E6%9C%83-%E6%88%B4%E7%AB%8B%E5%AE%89-%E5%8F%B0%E5%8C%97%E5%B8%82%E6%9C%80%E6%96%B0%E6%B0%91%E8%AA%BF%E6%96%B0%E8%81%9E%E7%A8%BF10%E6%9C%8820%E6%97%A5%E8%88%89%E7%99%BC%E8%A1%A8%E6%9C%83-194900434.html","note":"主持／分析：戴立安；市話＋手機訪問；設籍台北市20歲以上；其他4.2%含其他候選人與不投票選項，主要兩人結果同題但有其他選項。"},
-    {"county":"臺北市","pollster":"山水民意研究股份有限公司","sponsor":"震傳媒","fieldStart":"2026-10-18","fieldEnd":"2026-10-19","publishedAt":"2026-10-22","n":1074,"moe":2.99,"quality":0.95,"values":{"puma":42.8,"chiang":39},"undecided":18.1,"other":0.1,"url":"https://www.zmedia.com.tw/Document/PoolDetail/44789","note":"住宅電話CATI、尾2碼隨機；設籍台北市20歲以上；原題另有郭璽0.1%；95%信心水準；主持資訊請參考原始公告。"},
+    {"county":"臺北市","pollster":"TVBS民調中心","sponsor":"TVBS","fieldStart":"2026-10-03","fieldEnd":"2026-10-07","publishedAt":"2026-10-08","n":1120,"voteN":1054,"moe":2.9,"quality":1,"values":{"chiang":49,"puma":41},"undecided":11,"other":null,"url":"https://www.tvbs.com.tw/poll-center","note":"10/3、10/5–10/7；市話抽樣；20歲以上台北市民；投票意向為有投票意願者1054人，原公布數值有四捨五入，勿與全體樣本混為同一母體。"},
+    {"county":"臺北市","pollster":"畢肯市場研究公司","sponsor":"台北市信民兩岸研究協會","fieldStart":"2026-10-14","fieldEnd":"2026-10-16","publishedAt":"2026-10-20","n":1075,"moe":3,"quality":0.95,"useInModel":false,"values":{"puma":50.3,"chiang":33.3},"undecided":12.2,"other":4.2,"url":"https://tw.news.yahoo.com/%E4%BF%A1%E6%B0%91%E5%8D%94%E6%9C%83-%E6%88%B4%E7%AB%8B%E5%AE%89-%E5%8F%B0%E5%8C%97%E5%B8%82%E6%9C%80%E6%96%B0%E6%B0%91%E8%AA%BF%E6%96%B0%E8%81%9E%E7%A8%BF10%E6%9C%8820%E6%97%A5%E8%88%89%E7%99%BC%E8%A1%A8%E6%9C%83-194900434.html","note":"主持／分析：戴立安；市話＋手機訪問；設籍台北市20歲以上；其他4.2%含其他候選人與不投票選項，主要兩人結果同題但有其他選項。"},
+    {"county":"臺北市","pollster":"山水民意研究股份有限公司","sponsor":"震傳媒","fieldStart":"2026-10-18","fieldEnd":"2026-10-19","publishedAt":"2026-10-22","n":1074,"moe":2.99,"quality":0.95,"useInModel":false,"values":{"puma":42.8,"chiang":39},"undecided":18.1,"other":0.1,"url":"https://www.zmedia.com.tw/Document/PoolDetail/44789","note":"住宅電話CATI、尾2碼隨機；設籍台北市20歲以上；原題另有郭璽0.1%；95%信心水準；主持資訊請參考原始公告。"},
     {"county":"新北市","pollster":"TVBS民調中心","sponsor":"國民黨新北市議會黨團","fieldStart":"2026-09-29","fieldEnd":"2026-10-03","publishedAt":"2026-10-07","n":1210,"moe":2.8,"quality":0.85,"values":{"lee":42.6,"su":35.9},"undecided":19.9,"other":1.6,"url":"https://news.tvbs.com.tw/politics/4032874","note":"委託TVBS民調中心；20歲以上設籍新北市；平日與假日訪問；原公布兩主要候選人及未決定比例。"},
     {"county":"桃園市","pollster":"趨勢民意調查股份有限公司","sponsor":"財團法人凱達格蘭基金會／新台灣國策智庫","fieldStart":"2026-09-15","fieldEnd":"2026-09-17","publishedAt":"2026-09-22","n":1082,"moe":2.98,"quality":0.9,"values":{"chang":47,"huang":25.9},"undecided":27.1,"url":"https://poll-tw.com/taoyuan","note":"市話隨機抽樣；設籍桃園市20歲以上；95%信心水準；原始新聞報導與委託揭露見來源。"},
     {"county":"臺中市","pollster":"循證民調有限公司","sponsor":"台中市信賴台灣之友會","fieldStart":"2026-10-05","fieldEnd":"2026-10-06","publishedAt":"2026-10-12","n":1071,"moe":2.99,"quality":0.9,"values":{"johnny":34.3,"ho":32.4},"undecided":32.2,"other":1.1,"url":"https://poll-tw.com/taichung","note":"市話＋手機隨機抽樣；設籍台中市20歲以上；原題另有洪麗華1.1%，與兩主要候選人同題；投票意向作答對象未載明。"},
@@ -138,15 +138,21 @@ window.ELECTION_POLL_QUALITY = (() => {
     if (!Array.isArray(ids) || !ids.length) return "缺少比較選項";
     if (!isDate(p.fieldEnd) || p.fieldEnd > E.asOf ||
         (p.fieldStart && (!isDate(p.fieldStart) || p.fieldStart > p.fieldEnd)) ||
-        (p.publishedAt && (!isDate(p.publishedAt) || p.publishedAt > E.asOf))) return "日期缺漏／不合法";
+        (p.publishedAt && (!isDate(p.publishedAt) || p.publishedAt > E.asOf || p.publishedAt < p.fieldEnd))) return "日期缺漏／不合法";
     if (p.sampling === "online_nonprobability" ||
         /網路人口調查|封閉式網路問卷|網路問卷|手機簡訊|EDM/i.test(p.note || "")) return "非機率網路樣本";
     if (!/^https:\/\//.test(p.url || "")) return "缺少可核對來源";
     const n=Number(p.n), moe=Number(p.moe);
+    if (p.n!=null && (!Number.isInteger(n) || n<200)) return "有效樣本數異常";
+    if (p.voteN!=null && (!Number.isInteger(Number(p.voteN)) || Number(p.voteN)<200 || (p.n!=null && Number(p.voteN)>n))) return "子樣本數異常";
+    if (p.moe!=null && (!Number.isFinite(moe) || moe<=0 || moe>=15)) return "抽樣誤差異常";
     if (!(n>=200 || (moe>0 && moe<15))) return "樣本及抽樣誤差欠揭露";
+    if (p.questionType && !["candidate_vote_intention","party_support"].includes(p.questionType)) return "不同問卷題型";
+    if (p.sampling && !["landline_random","landline_mobile_random","mobile_random"].includes(p.sampling)) return "非機率抽樣";
     if (p.quality!=null && (!Number.isFinite(Number(p.quality)) || p.quality<=0 || p.quality>1)) return "品質參數異常";
     if (!p.values || !ids.every(id=>Object.prototype.hasOwnProperty.call(p.values,id) &&
         Number.isFinite(Number(p.values[id])) && p.values[id]>=0 && p.values[id]<=100)) return "模型選項數值不全";
+    if (Object.keys(p.values).some(id=>!ids.includes(id))) return "存在未列入模型候選人";
     const values=Object.values(p.values);
     if (values.some(v=>!Number.isFinite(Number(v)) || Number(v)<0 || Number(v)>100)) return "原始比例不合法";
     const sum=values.reduce((a,b)=>a+Number(b),0);
@@ -154,6 +160,7 @@ window.ELECTION_POLL_QUALITY = (() => {
     const extras=[p.undecided,p.other].filter(v=>v!=null);
     if (extras.some(v=>!Number.isFinite(Number(v)) || v<0 || v>100) ||
         sum+extras.reduce((a,b)=>a+Number(b),0)>101.5) return "分項合計異常";
+    if (p.undecided!=null && p.other!=null && Math.abs(sum+extras.reduce((a,b)=>a+Number(b),0)-100)>1.6) return "分項缺漏";
     return null;
   }
   return {reason,modelEligible:(p,ids)=>reason(p,ids)===null};
@@ -163,4 +170,5 @@ for (const kind of ["mayor","council","president"]) {
     date:"2026-10-24",label:"v3｜前版民調與公式",
     note:"上一版本未使用抽樣完整性閘門與同機構重複樣本資訊上限；此為方法版本紀錄，非數字快照。"
   });
+  window.ELECTION_DATA.history[kind].push({date:"2026-10-27",label:"v4｜調查資料品質與同機構計權",note:"本日稍早的版本；v5新增別名歸一、子樣本與資料充分度檢查。"});
 }
