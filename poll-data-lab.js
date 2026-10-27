@@ -4,6 +4,8 @@
   const C = window.POLL_CONTEXT_DATA || {indicators:[]};
   if (!E) return;
   const el = id => document.getElementById(id);
+  const dateNode = el("labAsOf");
+  if (dateNode) dateNode.textContent = E.asOf.replaceAll("-", "/");
   const htmlEscape = x => String(x == null ? "" : x).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const asNum = x => Number.isFinite(Number(x)) ? Number(x) : 0;
   const format = new Intl.NumberFormat("zh-TW");
