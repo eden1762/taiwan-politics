@@ -1,8 +1,18 @@
 // Factual, separately sourced contextual indicators, intentionally NOT candidate vote intention.
 // Different question types, populations and sampling frames must not be pooled together.
 window.POLL_CONTEXT_DATA = {
-  asOf: "2026-10-24",
+  asOf: "2026-10-27",
   indicators: [
+    {
+      id:"national-party-favorability-20261022",
+      label:"全國政黨好感度（2026年10月）", period:"2026-10-20～2026-10-22", fieldEnd:"2026-10-22",
+      scope:"全國22縣市設籍20歲以上民眾", questionType:"政黨好感度（非投票意向）",
+      sampling:"市話696份＋手機379份，CATI", pollster:"台灣民心調查／畢肯市場研究", n:1075,moe:3.0,
+      values:{"民進黨":49.0,"國民黨":27.9,"民眾黨":26.3},
+      url:"https://www.fountmedia.io/article/438427",
+      note:"10/27發布。好感度各黨分別回答，不互斥且不應正規化為100%；不納入選舉模型。"
+    },
+
     {
       id: "national-party-favorability-20261002",
       label: "全國政黨喜好度", period: "2026-09-29～2026-10-02", fieldEnd:"2026-10-02", scope:"全國22縣市",

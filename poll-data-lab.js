@@ -16,7 +16,7 @@
     o.president2024 += asNum(x.presidentVotes2024);
     return o;
   },{mayor2022:0,council2022:0,president2024:0});
-  const modelEligible = p => p.useInModel !== false;
+  const modelEligible = p => window.ELECTION_POLL_QUALITY.modelEligible(p,E.mayorRaces[p.county]?.candidates.map(c=>c.id)||[]);
   const dateSafe = s => /^\d{4}-\d{2}-\d{2}$/.test(s);
   const partyName = id => ({DPP:"民進黨",KMT:"國民黨",TPP:"民眾黨",IND:"無黨籍",OTHER:"其他"}[id] || id);
   const candName = (county,id) => E.mayorRaces[county]?.candidates?.find(c=>c.id===id)?.name || id;
