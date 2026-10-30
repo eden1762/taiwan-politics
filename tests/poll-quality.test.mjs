@@ -31,3 +31,22 @@ test("multi-candidate polls without matching model choices remain background",()
 test("dates cannot fall after data cutoff",()=>{
   for(const p of E.mayorPolls)assert.ok(p.fieldEnd<=E.asOf,p.pollster+" "+p.fieldEnd);
 });
+
+test("new published surveys remain contextual when candidate response options are incomplete",()=>{
+  for(const [county,date] of [["臺北市","2026-10-25"],["新竹縣","2026-10-26"]]){
+    const p=E.mayorPolls.find(x=>x.county===county && x.fieldEnd===date);
+    assert.ok(p, county); assert.equal(p.useInModel,false);
+    assert.ok(p.n>=1000 && p.moe>=2 && p.moe<=4);
+    assert.ok(p.url.startsWith("https://"));
+    assert.equal(q.modelEligible(p,E.mayorRaces[county].candidates.map(x=>x.id)),false);
+  }
+});
+test("22 county historical vote distributions are numeric and near 100 percent",()=>{
+  assert.equal(E.counties.length,22);
+  assert.equal(new Set(E.counties.map(c=>c.name)).size,22);
+  for(const c of E.counties){
+    assert.ok(Number.isInteger(c.presidentVotes2024) && c.presidentVotes2024>0,c.name);
+    for(const k of ["DPP","KMT","TPP"])assert.ok(Number.isFinite(c.p2024[k]) && c.p2024[k]>=0,c.name+":"+k);
+    assert.ok(Math.abs(Object.values(c.p2024).reduce((a,b)=>a+b,0)-100)<0.1,c.name);
+  }
+});

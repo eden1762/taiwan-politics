@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-Hant-TW"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>22縣市歷史政黨得票分布｜台灣公民與主權地圖</title>
+<meta name="description" content="2024總統與2022縣市長選舉22縣市實際得票結構、五大區域按有效票數加權及可追溯近期地方政黨認同調查。歷史得票不是最新支持度。">
+<link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./site-enhancements.css"><link rel="stylesheet" href="./regional-baseline.css">
+</head><body data-page="regional">
+<header class="topbar"><a class="brand" href="./index.html"><span class="brand-mark">台</span><span><strong>台灣公民與主權地圖</strong><small>Taiwan Civic & Sovereignty Map</small></span></a><button id="menuButton" class="menu-button" type="button" aria-label="開啟導覽">☰</button><nav id="mainNav" class="main-nav">
+<a href="./mayor-2026.html">2026縣市長</a><a href="./council-2026.html">2026縣市議員</a><a href="./president-2028.html">2028總統</a><a href="./method.html">模型與公式</a><a href="./data-lab.html">民調數據分析</a><a href="./regional-baseline.html" class="active">區域基本盤</a><a href="./sovereignty.html">主權活動</a>
+</nav></header>
+<main class="page-section">
+<div class="hero"><div><p class="eyebrow">REGIONAL HISTORICAL VOTES</p><h1>22 縣市歷史政黨得票分布</h1><p>以已開票的歷史選舉票數建立各地政治投票結構參照，分別顯示2024總統與2022縣市長選舉。這不是目前政黨支持率、不是固定不變的「鐵票」，也不是2026或2028選舉勝負機率。</p></div><div class="status-card"><b>資料核對</b><strong id="regionalAsOf">2026/10/30</strong><span>歷史選舉與近期民調題型分開</span></div></div>
+<section class="panel"><div class="panel-heading"><div><p class="eyebrow">ELECTION TYPE</p><h2>選擇不同歷史選舉</h2></div></div>
+<div class="regional-controls"><label>歷史選舉 <select id="baselineElection"><option value="president2024">2024 總統選舉（全國同一組候選人）</option><option value="mayor2022">2022 縣市長選舉（各地候選人不同）</option></select></label><label>地區 <select id="regionFilter"><option value="">全部地區</option><option value="北部">北部</option><option value="中部">中部</option><option value="南部">南部</option><option value="東部">東部</option><option value="離島">離島</option></select></label></div>
+<p class="regional-caution" id="electionDescription">2024 總統選舉候選人得票，按候選人所屬政黨分類。百分比以各縣市有效票為分母；不得視為2026政黨認同調查。</p>
+<div id="regionSummary" class="regional-groups"></div>
+<div class="table-wrap"><table id="countyBaselineTable" class="regional-table"><caption>各縣市歷史候選人得票百分比</caption></table></div>
+<p class="regional-caution">區域合計使用各縣市有效票數作權重：區域某黨比例 = Σ(縣市有效票數 × 該黨縣市比例) / Σ(縣市有效票數)。原資料百分比已四捨五入，區域數值會有微小捨入誤差。資料為本站原有歷史選舉表；請以<a href="https://db.cec.gov.tw/" target="_blank" rel="noopener noreferrer">中選會選舉資料庫</a>為準。</p>
+</section>
+<section class="panel"><div class="panel-heading"><div><p class="eyebrow">CURRENT SURVEY, NOT HISTORY</p><h2>近期地方政黨認同／傾向調查</h2></div></div>
+<p>以下列出已知可追溯、具有地方受訪母體的政黨題調查，與上方選舉實際得票率分開，不跨城市推估或補造沒有調查的縣市。</p><div id="localPartyPolls" class="regional-surveys"></div>
+<p class="regional-caution">各調查問法、抽樣框及時間不同；「政黨認同」與「政黨傾向」不一定可直接比較。沒有某縣市最新調查 ≠ 沒有該政黨支持者。</p></section>
+<section class="panel"><h2>資料用途及統計限制</h2><p>2022地方首長票反映當年的候選人、合作與地方政治因素；2024總統票反映當年總統候選人選擇，兩者都不能直接推成2026最新政黨支持。若要估計當前支持度，必須取得同口徑、具代表性的各地政黨支持民調，並另外量化抽樣偏差及不確定性。本站現有預測參數尚缺正式留出回測，無法證明其誤差已比舊版小。</p><p><a href="./data-lab.html">民調來源和抽樣資料</a>｜<a href="./method.html">模型公式與限制</a></p></section>
+</main><footer><strong>歷史選舉參照，不是即時選情判斷</strong><span>來源請查核中央選舉委員會及各調查公布者。</span></footer>
+<script src="./election-data.js"></script><script src="./bigdata-context.js"></script><script src="./regional-baseline.js"></script>
+</body></html>

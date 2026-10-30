@@ -1,5 +1,5 @@
 window.SITE_RESEARCH = {
-  asOf: "2026-10-27",
+  asOf: "2026-10-30",
   igUrl: "https://www.instagram.com/taiwan.independence.movement/",
   councilSeatBaseline: {
     election: "2022 local elections",
@@ -132,7 +132,7 @@ window.SITE_RESEARCH = {
 
 if (window.ELECTION_DATA) {
   window.ELECTION_DATA.asOf = window.SITE_RESEARCH.asOf;
-  window.ELECTION_DATA.candidateNotice = "截至 2026-10-27 已更新可追溯公開民調及抽樣可比性規則；不同調查的樣本、問法、委託來源與時間均可能不同。模型為現有程式之條件式運算，非選舉結果。正式候選人資格與號次請以中選會公告為準。";
+  window.ELECTION_DATA.candidateNotice = "截至 2026-10-30 已補入聯合報臺北及關鍵調查新竹縣公開民調；保留抽樣可比性規則；不同調查的樣本、問法、委託來源與時間均可能不同。模型為現有程式之條件式運算，非選舉結果。正式候選人資格與號次請以中選會公告為準。";
 
   const archive = window.SITE_RESEARCH.historicalPartyPolls;
   const comparable = archive.filter(p => p.type === "party_support" && p.useInModel !== false);

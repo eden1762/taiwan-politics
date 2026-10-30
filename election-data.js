@@ -1,7 +1,7 @@
 window.ELECTION_DATA = {
-  asOf: "2026-10-27",
+  asOf: "2026-10-30",
   localElectionDate: "2026-11-28",
-  candidateNotice: "截至 2026-10-27 已補入可追溯的最新公開民調，並標示抽樣與可比性限制；不同調查的樣本、問法、委託來源與時間均可能不同。模型為現有程式之條件式運算，非選舉結果。正式候選人資格與號次請以中選會公告為準。",
+  candidateNotice: "截至 2026-10-30 已補入新近公開民調與歷史區域投票參照，並標示抽樣與可比性限制；不同調查的樣本、問法、委託來源與時間均可能不同。模型為現有程式之條件式運算，非選舉結果。正式候選人資格與號次請以中選會公告為準。",
   geojsonUrl: "https://raw.githubusercontent.com/ronnywang/twgeojson/master/twcounty2010.2.json",
   parties: {
     DPP:{label:"民進黨",short:"民進黨",color:"#1b8f55"}, KMT:{label:"國民黨",short:"國民黨",color:"#2f6fce"}, TPP:{label:"民眾黨",short:"民眾黨",color:"#36aeb4"}, IND:{label:"無黨／合作",short:"無黨",color:"#c58b2a"}, JRP:{label:"司法改革黨",short:"司改黨",color:"#7a5fc0"}, TWP:{label:"台灣工黨",short:"台灣工黨",color:"#b45f82"}, OTHER:{label:"其他／未定",short:"其他",color:"#77828d"}
@@ -60,6 +60,8 @@ window.ELECTION_DATA = {
     "連江縣":{candidates:[{id:"wangchung",name:"王忠銘",party:"KMT",manualPrior:62.67},{id:"otherlc",name:"其他／未定",party:"OTHER",manualPrior:37.33}],note:"正式登記前主要競爭人選未完整，僅顯示結構估計。"}
   },
   mayorPolls:[
+    {"county":"臺北市","pollster":"聯合報系民意調查中心","sponsor":"聯合報","fieldStart":"2026-10-20","fieldEnd":"2026-10-25","publishedAt":"2026-10-28","n":1115,"moe":3,"values":{"chiang":41,"puma":45},"undecided":13,"other":null,"sampling":"landline_mobile_random","useInModel":false,"url":"https://udn.com/news/story/124652/9829301","note":"10/20–22、10/25市話＋手機雙底冊尾數隨機抽樣；另4位候選人合計不到1%，精確比例未公布。僅列原始結果，不把兩人票率正規化成完整選票；當選看好度不是支持率。"},
+    {"county":"新竹縣","pollster":"關鍵調查公司","sponsor":"台灣公共政策學會等單位（完整經費來源待確認）","fieldStart":"2026-10-25","fieldEnd":"2026-10-26","publishedAt":"2026-10-29","n":1070,"moe":3,"values":{"hsu":44.1,"cheng":37.7},"undecided":15.9,"other":null,"sampling":"landline_random","useInModel":false,"url":"https://www.mirrormedia.mg/story/20261029-169soc-210943","note":"中華電信市話尾數兩位隨機撥號／分層加權；公開兩人支持度與未表態15.9%，其餘2.3%選項未詳述，不自行補齊。當選看好度47.8/38.7另屬不同題型，不混算。"},
     {"county":"臺北市","pollster":"ETtoday民調雲","sponsor":"東森民調雲股份有限公司","fieldStart":"2026-10-21","fieldEnd":"2026-10-25","publishedAt":"2026-10-27","n":1462,"moe":2.56,"values":{"chiang":48.6,"puma":41.1},"undecided":8.7,"other":1.6,"sampling":"online_nonprobability","useInModel":false,"url":"https://ctinews.com/news/items/q9WPPgkmWm","note":"會員資料庫簡訊與EDM封閉式網路樣本；另有小黨候選人0.5%、不投票1.1%；抽樣涵蓋誤差不反映在報告±2.56%內，僅列背景。"},
     {"county":"新竹縣","pollster":"皮爾森數據","sponsor":"鄭朝方競選辦公室","fieldStart":"2026-09-14","fieldEnd":"2026-09-21","publishedAt":"2026-10-27","n":3098,"moe":1.76,"values":{"cheng":47.68,"hsu":33.4},"undecided":13.24,"sampling":"online_nonprobability","useInModel":false,"url":"https://www.ftnn.com.tw/news/590652","note":"10/27公開9月份競辦委託調查；網路人口與DMP樣本，另有朱定瑀0.79%，其餘分項未完整揭露。"},
     {"county":"新竹縣","pollster":"皮爾森數據","sponsor":"鄭朝方競選辦公室","fieldStart":"2026-10-12","fieldEnd":"2026-10-18","publishedAt":"2026-10-27","n":3054,"moe":1.77,"values":{"cheng":50.3,"hsu":34.87},"undecided":11.24,"other":3.59,"sampling":"online_nonprobability","useInModel":false,"url":"https://www.ftnn.com.tw/news/590652","note":"10/27公開10月份競辦委託調查；網路人口與DMP樣本，其他含朱定瑀1.14%及未完整列出的其他類別。"},

@@ -1,8 +1,9 @@
 // Factual, separately sourced contextual indicators, intentionally NOT candidate vote intention.
 // Different question types, populations and sampling frames must not be pooled together.
 window.POLL_CONTEXT_DATA = {
-  asOf: "2026-10-27",
+  asOf: "2026-10-30",
   indicators: [
+    {"id":"hsinchu-county-party-id-20261026","label":"新竹縣政黨認同（10/29發布）","period":"2026-10-25～2026-10-26","fieldEnd":"2026-10-26","scope":"設籍新竹縣、年滿20歲民眾","questionType":"政黨認同（非縣長投票意向）","sampling":"市話尾數兩碼隨機撥號；依地區、性別、年齡、教育程度加權","pollster":"關鍵調查公司（台灣公共政策學會等單位發布）","n":1070,"moe":3,"values":{"國民黨":36.1,"民進黨":23.9,"民眾黨":10.6},"url":"https://www.mirrormedia.mg/story/20261029-169soc-210943","note":"只公布三黨政黨認同值，其他選項不明；未聲稱其餘為同一類。屬2026年新竹縣政黨認同，非2024候選人得票，也非2026縣長民調。"},
     {
       id:"taipei-person-favorability-20261022",
       label:"台北市受訪者對政治人物好感度（10/27發布）",period:"2026-10-20～2026-10-22",fieldEnd:"2026-10-22",
