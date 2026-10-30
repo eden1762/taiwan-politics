@@ -208,7 +208,14 @@
     const hero=$('.hero')||$('.home-hero');if(hero){const note=document.createElement('p');note.className='en-note';note.textContent='English uses the same HTML, JavaScript and data sources as Chinese. Proper names and primary-source wording may remain in Chinese where no reliable official English form is available.';hero.appendChild(note);}
   }
 
-  // Provide a shared navigation link without duplicating all public HTML page templates.\n  const primaryNav = document.getElementById('mainNav');\n  if (primaryNav && !primaryNav.querySelector('a[data-page="lab"]')) {\n    const a = document.createElement('a'); a.dataset.page = 'lab'; a.href = './data-lab.html';\n    a.textContent = isEn ? 'Polling & Data' : '民調數據分析';\n    primaryNav.appendChild(a);\n  }\n  if (primaryNav && !primaryNav.querySelector('a[data-page="regional"]')) {
+  // Provide a shared navigation link without duplicating all public HTML page templates.
+  const primaryNav = document.getElementById('mainNav');
+  if (primaryNav && !primaryNav.querySelector('a[data-page="lab"]')) {
+    const a = document.createElement('a'); a.dataset.page = 'lab'; a.href = './data-lab.html';
+    a.textContent = isEn ? 'Polling & Data' : '民調數據分析';
+    primaryNav.appendChild(a);
+  }
+  if (primaryNav && !primaryNav.querySelector('a[data-page="regional"]')) {
     const a = document.createElement('a'); a.dataset.page = 'regional'; a.href = './regional-baseline.html';
     a.textContent = isEn ? 'Regional Results' : '區域基本盤';
     primaryNav.appendChild(a);
