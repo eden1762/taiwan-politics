@@ -32,7 +32,7 @@
     const publishedSigma=Number(poll.moe)>0?Number(poll.moe)/1.96:0;
     const samplingSigma=Math.max(sampleSigma,publishedSigma);
     const variance=samplingSigma**2+E.model.pollErrorFloor**2;
-    const recency=Math.pow(2,-age/halfLife);
+    const recency=quality.recencyFactor(age,halfLife);
     return {weight:(poll.quality??0.9)*recency/variance,age,samplingSigma,variance,recency};
   }
   function poolPolls(polls,ids,halfLife) {
